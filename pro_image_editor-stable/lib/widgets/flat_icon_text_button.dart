@@ -1,12 +1,10 @@
-// Flutter imports:
 import 'package:flutter/material.dart';
 
 /// A custom TextButton widget with an icon placed above the label.
 class FlatIconTextButton extends TextButton {
   /// Creates a [FlatIconTextButton] widget with the specified properties.
   ///
-  /// The [icon] and [label] parameters are required, while the others are
-  /// optional.
+  /// The [icon] and [label] parameters are required, while the others are optional.
   FlatIconTextButton({
     super.key,
     super.onPressed,

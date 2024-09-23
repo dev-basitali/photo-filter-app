@@ -1,26 +1,10 @@
-// Flutter imports:
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-// Project imports:
 import '../../pro_image_editor.dart';
 
-/// Represents the toolbar for the crop/rotate functionality in the WhatsApp
-/// theme.
+/// Represents the toolbar for the crop/rotate functionality in the WhatsApp theme.
 class WhatsAppCropRotateToolbar extends StatefulWidget {
-  /// Constructs a WhatsAppCropRotateToolbar widget with the specified
-  /// parameters.
-  const WhatsAppCropRotateToolbar({
-    super.key,
-    required this.bottomBarColor,
-    required this.configs,
-    required this.onCancel,
-    required this.onRotate,
-    required this.onDone,
-    required this.onReset,
-    required this.openAspectRatios,
-  });
-
   /// The configuration for the image editor.
   final ProImageEditorConfigs configs;
 
@@ -39,15 +23,22 @@ class WhatsAppCropRotateToolbar extends StatefulWidget {
   /// Callback function for opening aspect ratios.
   final Function() openAspectRatios;
 
-  /// Background color from the bottombar
-  final Color bottomBarColor;
+  /// Constructs a WhatsAppCropRotateToolbar widget with the specified parameters.
+  const WhatsAppCropRotateToolbar({
+    super.key,
+    required this.configs,
+    required this.onCancel,
+    required this.onRotate,
+    required this.onDone,
+    required this.onReset,
+    required this.openAspectRatios,
+  });
 
   @override
-  State<WhatsAppCropRotateToolbar> createState() =>
-      _WhatsAppCropRotateToolbar();
+  State<WhatsAppCropRotateToolbar> createState() => _WhatsAppAppbarState();
 }
 
-class _WhatsAppCropRotateToolbar extends State<WhatsAppCropRotateToolbar> {
+class _WhatsAppAppbarState extends State<WhatsAppCropRotateToolbar> {
   @override
   Widget build(BuildContext context) {
     if (widget.configs.designMode == ImageEditorDesignModeE.material) {
@@ -140,30 +131,29 @@ class _WhatsAppCropRotateToolbar extends State<WhatsAppCropRotateToolbar> {
           ),
         ),
         Container(
-          color: widget.bottomBarColor,
-          child: SafeArea(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                CupertinoButton(
-                  onPressed: widget.onCancel,
-                  padding: padding,
-                  child: Text(
-                    widget.configs.i18n.cropRotateEditor.cancel,
-                    style: style,
-                  ),
+          color: widget.configs.imageEditorTheme.cropRotateEditor
+              .whatsappCupertinoBottomBarColor,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              CupertinoButton(
+                onPressed: widget.onCancel,
+                padding: padding,
+                child: Text(
+                  widget.configs.i18n.cropRotateEditor.cancel,
+                  style: style,
                 ),
-                CupertinoButton(
-                  onPressed: widget.onDone,
-                  padding: padding,
-                  child: Text(
-                    widget.configs.i18n.cropRotateEditor.done,
-                    style: style.copyWith(fontWeight: FontWeight.w500),
-                  ),
+              ),
+              CupertinoButton(
+                onPressed: widget.onDone,
+                padding: padding,
+                child: Text(
+                  widget.configs.i18n.cropRotateEditor.done,
+                  style: style.copyWith(fontWeight: FontWeight.w500),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ],

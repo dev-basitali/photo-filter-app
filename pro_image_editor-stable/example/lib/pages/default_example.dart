@@ -1,16 +1,13 @@
-// Dart imports:
+// ignore_for_file: depend_on_referenced_packages
+
 import 'dart:io';
 
-// Flutter imports:
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
-// Package imports:
-import 'package:file_picker/file_picker.dart';
 import 'package:pro_image_editor/pro_image_editor.dart';
+import 'package:pro_image_editor/widgets/loading_dialog.dart';
 
-// Project imports:
-import '../utils/example_constants.dart';
 import '../utils/example_helper.dart';
 
 class DefaultExample extends StatefulWidget {
@@ -51,20 +48,22 @@ class _DefaultExampleState extends State<DefaultExample>
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () async {
                     Navigator.pop(context);
-                    LoadingDialog.instance.show(
-                      context,
-                      configs: const ProImageEditorConfigs(),
-                      theme: ThemeData.dark(),
-                    );
-
-                    var url = 'https://picsum.photos/5000';
+                    LoadingDialog loading = LoadingDialog()
+                      ..show(
+                        context,
+                        theme: Theme.of(context),
+                        imageEditorTheme: const ImageEditorTheme(
+                          loadingDialogTheme: LoadingDialogTheme(
+                            textColor: Colors.black,
+                          ),
+                        ),
+                        designMode: ImageEditorDesignModeE.material,
+                        i18n: const I18n(),
+                      );
+                    var url = 'https://picsum.photos/2000';
                     var bytes = await fetchImageAsUint8List(url);
 
-                    if (!context.mounted) return;
-                    await precacheImage(MemoryImage(bytes), context);
-
-                    LoadingDialog.instance.hide();
-
+                    if (context.mounted) await loading.hide(context);
                     if (!context.mounted) return;
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -76,12 +75,8 @@ class _DefaultExampleState extends State<DefaultExample>
                   leading: const Icon(Icons.folder_outlined),
                   title: const Text('Editor from asset'),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () async {
+                  onTap: () {
                     Navigator.pop(context);
-                    await precacheImage(
-                        AssetImage(ExampleConstants.of(context)!.demoAssetPath),
-                        context);
-                    if (!context.mounted) return;
                     Navigator.of(context).push(
                       MaterialPageRoute(
                           builder: (context) => _buildAssetEditor()),
@@ -92,22 +87,8 @@ class _DefaultExampleState extends State<DefaultExample>
                   leading: const Icon(Icons.public_outlined),
                   title: const Text('Editor from network'),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () async {
+                  onTap: () {
                     Navigator.pop(context);
-
-                    LoadingDialog.instance.show(
-                      context,
-                      configs: const ProImageEditorConfigs(),
-                      theme: ThemeData.dark(),
-                    );
-
-                    await precacheImage(
-                        NetworkImage(
-                            ExampleConstants.of(context)!.demoNetworkUrl),
-                        context);
-
-                    LoadingDialog.instance.hide();
-                    if (!context.mounted) return;
                     Navigator.of(context).push(
                       MaterialPageRoute(
                           builder: (context) => _buildNetworkEditor()),
@@ -133,8 +114,6 @@ class _DefaultExampleState extends State<DefaultExample>
 
                           if (result != null && context.mounted) {
                             File file = File(result.files.single.path!);
-                            await precacheImage(FileImage(file), context);
-                            if (!context.mounted) return;
                             Navigator.of(context).push(
                               MaterialPageRoute(
                                   builder: (context) => _buildFileEditor(file)),
@@ -155,57 +134,37 @@ class _DefaultExampleState extends State<DefaultExample>
 
   Widget _buildAssetEditor() {
     return ProImageEditor.asset(
-      ExampleConstants.of(context)!.demoAssetPath,
-      callbacks: ProImageEditorCallbacks(
-        onImageEditingStarted: onImageEditingStarted,
-        onImageEditingComplete: onImageEditingComplete,
-        onCloseEditor: onCloseEditor,
-      ),
-      configs: ProImageEditorConfigs(
-        designMode: platformDesignMode,
-      ),
+      'assets/demo.png',
+      onImageEditingComplete: onImageEditingComplete,
+      onCloseEditor: onCloseEditor,
+      allowCompleteWithEmptyEditing: true,
     );
   }
 
   Widget _buildMemoryEditor(Uint8List bytes) {
     return ProImageEditor.memory(
       bytes,
-      callbacks: ProImageEditorCallbacks(
-        onImageEditingStarted: onImageEditingStarted,
-        onImageEditingComplete: onImageEditingComplete,
-        onCloseEditor: onCloseEditor,
-      ),
-      configs: ProImageEditorConfigs(
-        designMode: platformDesignMode,
-      ),
+      onImageEditingComplete: onImageEditingComplete,
+      onCloseEditor: onCloseEditor,
+      allowCompleteWithEmptyEditing: true,
     );
   }
 
   Widget _buildNetworkEditor() {
     return ProImageEditor.network(
-      ExampleConstants.of(context)!.demoNetworkUrl,
-      callbacks: ProImageEditorCallbacks(
-        onImageEditingStarted: onImageEditingStarted,
-        onImageEditingComplete: onImageEditingComplete,
-        onCloseEditor: onCloseEditor,
-      ),
-      configs: ProImageEditorConfigs(
-        designMode: platformDesignMode,
-      ),
+      'https://picsum.photos/id/237/2000',
+      onImageEditingComplete: onImageEditingComplete,
+      onCloseEditor: onCloseEditor,
+      allowCompleteWithEmptyEditing: true,
     );
   }
 
   Widget _buildFileEditor(File file) {
     return ProImageEditor.file(
       file,
-      callbacks: ProImageEditorCallbacks(
-        onImageEditingStarted: onImageEditingStarted,
-        onImageEditingComplete: onImageEditingComplete,
-        onCloseEditor: onCloseEditor,
-      ),
-      configs: ProImageEditorConfigs(
-        designMode: platformDesignMode,
-      ),
+      onImageEditingComplete: onImageEditingComplete,
+      onCloseEditor: onCloseEditor,
+      allowCompleteWithEmptyEditing: true,
     );
   }
 }

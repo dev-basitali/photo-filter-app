@@ -1,21 +1,15 @@
-// Dart imports:
 import 'dart:math';
-
-// Flutter imports:
 import 'package:flutter/material.dart';
-
-// Project imports:
 import 'package:pro_image_editor/pro_image_editor.dart';
 
-export 'color_picker_configs.dart';
+import 'color_picker_configs.dart';
 
 /// A padding used to calculate bar height(thumbRadius * 2 - kBarPadding).
 const _kBarPadding = 4;
 
 /// A widget that allows users to pick colors from a gradient bar.
 ///
-/// The `BarColorPicker` widget provides a horizontal or vertical bar with a
-/// thumb that users can drag to select a color from a gradient.
+/// The `BarColorPicker` widget provides a horizontal or vertical bar with a thumb that users can drag to select a color from a gradient.
 ///
 /// Example Usage:
 /// ```dart
@@ -30,24 +24,6 @@ const _kBarPadding = 4;
 /// )
 /// ```
 class BarColorPicker extends StatefulWidget {
-  /// A widget for selecting colors using a bar-based picker.
-  const BarColorPicker({
-    super.key,
-    this.pickMode = PickMode.color,
-    this.horizontal = true,
-    this.showThumb = true,
-    this.length = 200,
-    this.borderWidth = 0.0,
-    this.cornerRadius = 0.0,
-    this.thumbRadius = 6,
-    this.initialColor = const Color(0xffff0000),
-    this.thumbColor = Colors.black,
-    this.onPositionChange,
-    this.initPosition,
-    required this.colorListener,
-    required this.configs,
-  });
-
   /// The pick mode, which determines the available color options.
   final PickMode pickMode;
 
@@ -73,20 +49,28 @@ class BarColorPicker extends StatefulWidget {
   final Color initialColor;
 
   /// Callback function that is called when the thumb position changes.
-  final ValueChanged<double>? onPositionChange;
+  final ValueChanged? onPositionChange;
 
-  /// The initial position of the thumb in the bar. If not provided, it will be
-  /// estimated based on the gradient and an initial color.
+  /// The initial position of the thumb in the bar. If not provided, it will be estimated based on the gradient and an initial color.
   final double? initPosition;
 
   /// Image editor configurations.
   final ProImageEditorConfigs configs;
 
-  /// Show on the slider a thumb widget.
-  final bool showThumb;
-
-  /// The border width around the slider.
-  final double borderWidth;
+  const BarColorPicker({
+    super.key,
+    this.pickMode = PickMode.color,
+    this.horizontal = true,
+    this.length = 200,
+    this.cornerRadius = 0.0,
+    this.thumbRadius = 6,
+    this.initialColor = const Color(0xffff0000),
+    this.thumbColor = Colors.black,
+    this.onPositionChange,
+    this.initPosition,
+    required this.colorListener,
+    required this.configs,
+  });
 
   @override
   createState() => _BarColorPickerState();
@@ -192,8 +176,8 @@ class _BarColorPickerState extends State<BarColorPicker>
     // interpolation factor (t) that brings color 'a' towards color 'b' to
     // approximate the target color. This can be a complex task depending on
     // how accurate you want it to be. A simple approach would be to try several
-    // values of t and choose the one that results in a color closest to the
-    // target. For more accuracy, more sophisticated methods may be used.
+    // values of t and choose the one that results in a color closest to the target.
+    // For more accuracy, more sophisticated methods may be used.
 
     double bestT = 0;
     double minDistance = double.infinity;
@@ -232,7 +216,7 @@ class _BarColorPickerState extends State<BarColorPicker>
     }
 
     if (colors.isEmpty) {
-      throw ArgumentError('The colors list must not be empty.');
+      throw ArgumentError("The colors list must not be empty.");
     } else if (colors.length == 1) {
       return colors.first;
     }
@@ -255,7 +239,14 @@ class _BarColorPickerState extends State<BarColorPicker>
 
     Gradient gradient;
 
-    double borderWidth = widget.borderWidth;
+    bool isSimpleEditor =
+        widget.configs.imageEditorTheme.editorMode == ThemeEditorMode.simple;
+
+    double borderWidth =
+        widget.configs.designMode == ImageEditorDesignModeE.cupertino &&
+                !isSimpleEditor
+            ? 2
+            : 0;
     double left, top;
     double? thumbLeft, thumbTop;
 
@@ -308,7 +299,7 @@ class _BarColorPickerState extends State<BarColorPicker>
                 borderWidth: borderWidth,
                 gradient: gradient,
               ),
-              if (widget.showThumb)
+              if (isSimpleEditor)
                 _buildThumb(
                   borderWidth: borderWidth,
                   thumbRadius: thumbRadius,

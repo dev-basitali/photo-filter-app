@@ -1,24 +1,11 @@
-// Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:pro_image_editor/models/editor_configs/pro_image_editor_configs.dart';
 
-// Project imports:
-import 'package:pro_image_editor/pro_image_editor.dart';
 import 'utils/whatsapp_appbar_button_style.dart';
 import 'whatsapp_done_btn.dart';
 
 /// Represents the app bar for the paint functionality in the WhatsApp theme.
 class WhatsAppPaintAppBar extends StatefulWidget {
-  /// Creates a [WhatsAppPaintAppBar] widget.
-  const WhatsAppPaintAppBar({
-    super.key,
-    required this.canUndo,
-    required this.activeColor,
-    required this.configs,
-    required this.onClose,
-    required this.onDone,
-    required this.onTapUndo,
-  });
-
   /// Indicates whether the undo action is available.
   final bool canUndo;
 
@@ -36,6 +23,16 @@ class WhatsAppPaintAppBar extends StatefulWidget {
 
   /// Callback function for undoing a paint action.
   final Function() onTapUndo;
+
+  const WhatsAppPaintAppBar({
+    super.key,
+    required this.canUndo,
+    required this.activeColor,
+    required this.configs,
+    required this.onClose,
+    required this.onDone,
+    required this.onTapUndo,
+  });
 
   @override
   State<WhatsAppPaintAppBar> createState() => _WhatsAppPaintAppBarState();
@@ -56,8 +53,12 @@ class _WhatsAppPaintAppBarState extends State<WhatsAppPaintAppBar> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            if (widget.configs.designMode == ImageEditorDesignModeE.cupertino)
-              _buildDoneBtn(),
+            WhatsAppDoneBtn(
+              foregroundColor: widget.configs.imageEditorTheme.paintingEditor
+                  .appBarForegroundColor,
+              configs: widget.configs,
+              onPressed: widget.onDone,
+            ),
             const Spacer(),
             gap,
             AnimatedSwitcher(
@@ -76,40 +77,20 @@ class _WhatsAppPaintAppBarState extends State<WhatsAppPaintAppBar> {
                       icon: Icon(widget.configs.icons.undoAction),
                       style: whatsAppButtonStyle,
                     )
-                  : Opacity(
-                      opacity: 0,
-                      child: IconButton(
-                        onPressed: null,
-                        icon: Icon(widget.configs.icons.undoAction),
-                        style: whatsAppButtonStyle,
-                      ),
-                    ),
+                  : const SizedBox.shrink(),
             ),
             gap,
-            if (widget.configs.designMode == ImageEditorDesignModeE.material)
-              _buildDoneBtn()
-            else
-              IconButton(
-                tooltip:
-                    widget.configs.i18n.paintEditor.bottomNavigationBarText,
-                onPressed: () {},
-                icon: Icon(widget.configs.icons.paintingEditor.bottomNavBar),
-                style: whatsAppButtonStyle.copyWith(
-                  backgroundColor: WidgetStateProperty.all(widget.activeColor),
-                ),
+            IconButton(
+              tooltip: widget.configs.i18n.paintEditor.bottomNavigationBarText,
+              onPressed: () {},
+              icon: Icon(widget.configs.icons.paintingEditor.bottomNavBar),
+              style: whatsAppButtonStyle.copyWith(
+                backgroundColor: WidgetStateProperty.all(widget.activeColor),
               ),
+            ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildDoneBtn() {
-    return WhatsAppDoneBtn(
-      foregroundColor:
-          widget.configs.imageEditorTheme.paintingEditor.appBarForegroundColor,
-      configs: widget.configs,
-      onPressed: widget.onDone,
     );
   }
 }

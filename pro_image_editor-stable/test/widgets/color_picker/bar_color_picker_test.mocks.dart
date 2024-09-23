@@ -3,31 +3,23 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes, must_be_immutable
-
-// Dart imports:
 import 'dart:ui' as _i2;
 
-// Flutter imports:
-import 'package:flutter/foundation.dart' as _i5;
-import 'package:flutter/material.dart' as _i4;
-
-// Package imports:
+import 'package:flutter/foundation.dart' as _i4;
+import 'package:flutter/material.dart' as _i3;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i8;
-
-// Project imports:
-import 'package:pro_image_editor/pro_image_editor.dart' as _i3;
-
+import 'package:mockito/src/dummies.dart' as _i7;
 import 'package:pro_image_editor/widgets/color_picker/bar_color_picker.dart'
-    as _i6;
+    as _i5;
 import 'package:pro_image_editor/widgets/color_picker/color_picker_configs.dart'
-    as _i7;
+    as _i6;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
 // ignore_for_file: avoid_setters_without_getters
 // ignore_for_file: comment_references
 // ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use_from_same_package
 // ignore_for_file: implementation_imports
 // ignore_for_file: invalid_use_of_visible_for_testing_member
 // ignore_for_file: prefer_const_constructors
@@ -45,20 +37,9 @@ class _FakeColor_0 extends _i1.SmartFake implements _i2.Color {
         );
 }
 
-class _FakeProImageEditorConfigs_1 extends _i1.SmartFake
-    implements _i3.ProImageEditorConfigs {
-  _FakeProImageEditorConfigs_1(
-    Object parent,
-    Invocation parentInvocation,
-  ) : super(
-          parent,
-          parentInvocation,
-        );
-}
-
-class _FakeState_2<T extends _i4.StatefulWidget> extends _i1.SmartFake
-    implements _i4.State<T> {
-  _FakeState_2(
+class _FakeState_1<T extends _i3.StatefulWidget> extends _i1.SmartFake
+    implements _i3.State<T> {
+  _FakeState_1(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -67,13 +48,13 @@ class _FakeState_2<T extends _i4.StatefulWidget> extends _i1.SmartFake
         );
 
   @override
-  String toString({_i4.DiagnosticLevel? minLevel = _i4.DiagnosticLevel.info}) =>
+  String toString({_i3.DiagnosticLevel? minLevel = _i3.DiagnosticLevel.info}) =>
       super.toString();
 }
 
-class _FakeStatefulElement_3 extends _i1.SmartFake
-    implements _i4.StatefulElement {
-  _FakeStatefulElement_3(
+class _FakeStatefulElement_2 extends _i1.SmartFake
+    implements _i3.StatefulElement {
+  _FakeStatefulElement_2(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -82,13 +63,13 @@ class _FakeStatefulElement_3 extends _i1.SmartFake
         );
 
   @override
-  String toString({_i4.DiagnosticLevel? minLevel = _i4.DiagnosticLevel.info}) =>
+  String toString({_i3.DiagnosticLevel? minLevel = _i3.DiagnosticLevel.info}) =>
       super.toString();
 }
 
-class _FakeDiagnosticsNode_4 extends _i1.SmartFake
-    implements _i4.DiagnosticsNode {
-  _FakeDiagnosticsNode_4(
+class _FakeDiagnosticsNode_3 extends _i1.SmartFake
+    implements _i3.DiagnosticsNode {
+  _FakeDiagnosticsNode_3(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -98,8 +79,8 @@ class _FakeDiagnosticsNode_4 extends _i1.SmartFake
 
   @override
   String toString({
-    _i5.TextTreeConfiguration? parentConfiguration,
-    _i4.DiagnosticLevel? minLevel = _i4.DiagnosticLevel.info,
+    _i4.TextTreeConfiguration? parentConfiguration,
+    _i3.DiagnosticLevel? minLevel = _i3.DiagnosticLevel.info,
   }) =>
       super.toString();
 }
@@ -107,13 +88,13 @@ class _FakeDiagnosticsNode_4 extends _i1.SmartFake
 /// A class which mocks [BarColorPicker].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockBarColorPicker extends _i1.Mock implements _i6.BarColorPicker {
+class MockBarColorPicker extends _i1.Mock implements _i5.BarColorPicker {
   @override
-  _i7.PickMode get pickMode => (super.noSuchMethod(
+  _i6.PickMode get pickMode => (super.noSuchMethod(
         Invocation.getter(#pickMode),
-        returnValue: _i7.PickMode.color,
-        returnValueForMissingStub: _i7.PickMode.color,
-      ) as _i7.PickMode);
+        returnValue: _i6.PickMode.color,
+        returnValueForMissingStub: _i6.PickMode.color,
+      ) as _i6.PickMode);
 
   @override
   double get length => (super.noSuchMethod(
@@ -177,61 +158,48 @@ class MockBarColorPicker extends _i1.Mock implements _i6.BarColorPicker {
       ) as _i2.Color);
 
   @override
-  _i3.ProImageEditorConfigs get configs => (super.noSuchMethod(
-        Invocation.getter(#configs),
-        returnValue: _FakeProImageEditorConfigs_1(
-          this,
-          Invocation.getter(#configs),
-        ),
-        returnValueForMissingStub: _FakeProImageEditorConfigs_1(
-          this,
-          Invocation.getter(#configs),
-        ),
-      ) as _i3.ProImageEditorConfigs);
-
-  @override
-  _i4.State<_i4.StatefulWidget> createState() => (super.noSuchMethod(
+  _i3.State<_i3.StatefulWidget> createState() => (super.noSuchMethod(
         Invocation.method(
           #createState,
           [],
         ),
-        returnValue: _FakeState_2<_i4.StatefulWidget>(
+        returnValue: _FakeState_1<_i3.StatefulWidget>(
           this,
           Invocation.method(
             #createState,
             [],
           ),
         ),
-        returnValueForMissingStub: _FakeState_2<_i4.StatefulWidget>(
+        returnValueForMissingStub: _FakeState_1<_i3.StatefulWidget>(
           this,
           Invocation.method(
             #createState,
             [],
           ),
         ),
-      ) as _i4.State<_i4.StatefulWidget>);
+      ) as _i3.State<_i3.StatefulWidget>);
 
   @override
-  _i4.StatefulElement createElement() => (super.noSuchMethod(
+  _i3.StatefulElement createElement() => (super.noSuchMethod(
         Invocation.method(
           #createElement,
           [],
         ),
-        returnValue: _FakeStatefulElement_3(
+        returnValue: _FakeStatefulElement_2(
           this,
           Invocation.method(
             #createElement,
             [],
           ),
         ),
-        returnValueForMissingStub: _FakeStatefulElement_3(
+        returnValueForMissingStub: _FakeStatefulElement_2(
           this,
           Invocation.method(
             #createElement,
             [],
           ),
         ),
-      ) as _i4.StatefulElement);
+      ) as _i3.StatefulElement);
 
   @override
   String toStringShort() => (super.noSuchMethod(
@@ -239,14 +207,14 @@ class MockBarColorPicker extends _i1.Mock implements _i6.BarColorPicker {
           #toStringShort,
           [],
         ),
-        returnValue: _i8.dummyValue<String>(
+        returnValue: _i7.dummyValue<String>(
           this,
           Invocation.method(
             #toStringShort,
             [],
           ),
         ),
-        returnValueForMissingStub: _i8.dummyValue<String>(
+        returnValueForMissingStub: _i7.dummyValue<String>(
           this,
           Invocation.method(
             #toStringShort,
@@ -256,7 +224,7 @@ class MockBarColorPicker extends _i1.Mock implements _i6.BarColorPicker {
       ) as String);
 
   @override
-  void debugFillProperties(_i5.DiagnosticPropertiesBuilder? properties) =>
+  void debugFillProperties(_i4.DiagnosticPropertiesBuilder? properties) =>
       super.noSuchMethod(
         Invocation.method(
           #debugFillProperties,
@@ -268,7 +236,7 @@ class MockBarColorPicker extends _i1.Mock implements _i6.BarColorPicker {
   @override
   String toStringShallow({
     String? joiner = r', ',
-    _i4.DiagnosticLevel? minLevel = _i4.DiagnosticLevel.debug,
+    _i3.DiagnosticLevel? minLevel = _i3.DiagnosticLevel.debug,
   }) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -279,7 +247,7 @@ class MockBarColorPicker extends _i1.Mock implements _i6.BarColorPicker {
             #minLevel: minLevel,
           },
         ),
-        returnValue: _i8.dummyValue<String>(
+        returnValue: _i7.dummyValue<String>(
           this,
           Invocation.method(
             #toStringShallow,
@@ -290,7 +258,7 @@ class MockBarColorPicker extends _i1.Mock implements _i6.BarColorPicker {
             },
           ),
         ),
-        returnValueForMissingStub: _i8.dummyValue<String>(
+        returnValueForMissingStub: _i7.dummyValue<String>(
           this,
           Invocation.method(
             #toStringShallow,
@@ -307,7 +275,7 @@ class MockBarColorPicker extends _i1.Mock implements _i6.BarColorPicker {
   String toStringDeep({
     String? prefixLineOne = r'',
     String? prefixOtherLines,
-    _i4.DiagnosticLevel? minLevel = _i4.DiagnosticLevel.debug,
+    _i3.DiagnosticLevel? minLevel = _i3.DiagnosticLevel.debug,
   }) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -319,7 +287,7 @@ class MockBarColorPicker extends _i1.Mock implements _i6.BarColorPicker {
             #minLevel: minLevel,
           },
         ),
-        returnValue: _i8.dummyValue<String>(
+        returnValue: _i7.dummyValue<String>(
           this,
           Invocation.method(
             #toStringDeep,
@@ -331,7 +299,7 @@ class MockBarColorPicker extends _i1.Mock implements _i6.BarColorPicker {
             },
           ),
         ),
-        returnValueForMissingStub: _i8.dummyValue<String>(
+        returnValueForMissingStub: _i7.dummyValue<String>(
           this,
           Invocation.method(
             #toStringDeep,
@@ -346,9 +314,9 @@ class MockBarColorPicker extends _i1.Mock implements _i6.BarColorPicker {
       ) as String);
 
   @override
-  _i4.DiagnosticsNode toDiagnosticsNode({
+  _i3.DiagnosticsNode toDiagnosticsNode({
     String? name,
-    _i5.DiagnosticsTreeStyle? style,
+    _i4.DiagnosticsTreeStyle? style,
   }) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -359,7 +327,7 @@ class MockBarColorPicker extends _i1.Mock implements _i6.BarColorPicker {
             #style: style,
           },
         ),
-        returnValue: _FakeDiagnosticsNode_4(
+        returnValue: _FakeDiagnosticsNode_3(
           this,
           Invocation.method(
             #toDiagnosticsNode,
@@ -370,7 +338,7 @@ class MockBarColorPicker extends _i1.Mock implements _i6.BarColorPicker {
             },
           ),
         ),
-        returnValueForMissingStub: _FakeDiagnosticsNode_4(
+        returnValueForMissingStub: _FakeDiagnosticsNode_3(
           this,
           Invocation.method(
             #toDiagnosticsNode,
@@ -381,19 +349,19 @@ class MockBarColorPicker extends _i1.Mock implements _i6.BarColorPicker {
             },
           ),
         ),
-      ) as _i4.DiagnosticsNode);
+      ) as _i3.DiagnosticsNode);
 
   @override
-  List<_i4.DiagnosticsNode> debugDescribeChildren() => (super.noSuchMethod(
+  List<_i3.DiagnosticsNode> debugDescribeChildren() => (super.noSuchMethod(
         Invocation.method(
           #debugDescribeChildren,
           [],
         ),
-        returnValue: <_i4.DiagnosticsNode>[],
-        returnValueForMissingStub: <_i4.DiagnosticsNode>[],
-      ) as List<_i4.DiagnosticsNode>);
+        returnValue: <_i3.DiagnosticsNode>[],
+        returnValueForMissingStub: <_i3.DiagnosticsNode>[],
+      ) as List<_i3.DiagnosticsNode>);
 
   @override
-  String toString({_i4.DiagnosticLevel? minLevel = _i4.DiagnosticLevel.info}) =>
+  String toString({_i3.DiagnosticLevel? minLevel = _i3.DiagnosticLevel.info}) =>
       super.toString();
 }

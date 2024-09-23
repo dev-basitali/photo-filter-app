@@ -1,11 +1,10 @@
-// Flutter imports:
 import 'package:flutter/material.dart';
-
-// FontAwesome import:
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 /// Customizable icons for the Emoji Editor component.
 class IconsEmojiEditor {
+  /// The icon to be displayed in the bottom navigation bar.
+  final IconData bottomNavBar;
+
   /// Creates an instance of [IconsEmojiEditor] with customizable icon settings.
   ///
   /// You can provide a custom [bottomNavBar] icon to be displayed in the
@@ -16,13 +15,10 @@ class IconsEmojiEditor {
   ///
   /// ```dart
   /// IconsEmojiEditor(
-  ///   bottomNavBar: FontAwesomeIcons.smile,
+  ///   bottomNavBar: Icons.sentiment_satisfied_alt_rounded,
   /// )
   /// ```
   const IconsEmojiEditor({
-    this.bottomNavBar = FontAwesomeIcons.smile,
+    this.bottomNavBar = Icons.sentiment_satisfied_alt_rounded,
   });
-
-  /// The icon to be displayed in the bottom navigation bar.
-  final IconData bottomNavBar;
 }

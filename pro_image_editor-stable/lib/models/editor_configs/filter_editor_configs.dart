@@ -1,5 +1,4 @@
-// Project imports:
-import 'package:pro_image_editor/modules/filter_editor/utils/filter_generator/filter_model.dart';
+import 'package:colorfilter_generator/colorfilter_generator.dart';
 
 /// Configuration options for a filter editor.
 ///
@@ -17,40 +16,25 @@ import 'package:pro_image_editor/modules/filter_editor/utils/filter_generator/fi
 /// );
 /// ```
 class FilterEditorConfigs {
-  /// Creates an instance of FilterEditorConfigs with optional settings.
-  ///
-  /// By default, the editor is enabled, and the filter list contains all
-  /// filters.
-  const FilterEditorConfigs({
-    this.enabled = true,
-    this.showLayers = true,
-    this.filterList,
-  });
-
   /// Indicates whether the filter editor is enabled.
   final bool enabled;
 
   /// Show also layers in the editor.
   final bool showLayers;
 
-  /// A list of color filter generators to apply to an image.
-  final List<FilterModel>? filterList;
+  /// Offset for the filter text, helpful if the user has an input field that overlays in a stack widget.
+  final double whatsAppFilterTextOffsetY;
 
-  /// Creates a copy of this `FilterEditorConfigs` object with the given fields
-  /// replaced with new values.
+  /// A list of color filter generators to apply to an image.
+  final List<ColorFilterGenerator>? filterList;
+
+  /// Creates an instance of FilterEditorConfigs with optional settings.
   ///
-  /// The [copyWith] method allows you to create a new instance of
-  /// [FilterEditorConfigs] with some properties updated while keeping the
-  /// others unchanged.
-  FilterEditorConfigs copyWith({
-    bool? enabled,
-    bool? showLayers,
-    List<FilterModel>? filterList,
-  }) {
-    return FilterEditorConfigs(
-      enabled: enabled ?? this.enabled,
-      showLayers: showLayers ?? this.showLayers,
-      filterList: filterList ?? this.filterList,
-    );
-  }
+  /// By default, the editor is enabled, and the filter list contains all filters.
+  const FilterEditorConfigs({
+    this.enabled = true,
+    this.showLayers = true,
+    this.whatsAppFilterTextOffsetY = 0,
+    this.filterList,
+  });
 }

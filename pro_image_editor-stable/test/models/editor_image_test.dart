@@ -1,20 +1,13 @@
-// Dart imports:
-import 'dart:io';
 import 'dart:typed_data';
-
-// Flutter imports:
-import 'package:flutter/material.dart';
-
-// Package imports:
+import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
-
-// Project imports:
 import 'package:pro_image_editor/models/editor_image.dart';
+
 import '../fake/fake_image.dart';
 
 void main() {
   group('EditorImage', () {
-    test('Constructor should initialize properties correctly', () async {
+    test('Constructor should initialize properties correctly', () {
       final Uint8List byteArray = fakeMemoryImage;
       final File file = fakeFileImage;
       const String networkUrl = fakeNetworkImage;
@@ -35,18 +28,18 @@ void main() {
 
     test('Constructor should throw an error if all properties are null', () {
       expect(
-        EditorImage.new,
+        () => EditorImage(),
         throwsA(isA<AssertionError>()),
       );
     });
 
-    test('hasBytes should return true when byteArray is not null', () async {
+    test('hasBytes should return true when byteArray is not null', () {
       final Uint8List byteArray = fakeMemoryImage;
       final EditorImage image = EditorImage(byteArray: byteArray);
       expect(image.hasBytes, isTrue);
     });
 
-    test('type should return the correct EditorImageType', () async {
+    test('type should return the correct EditorImageType', () {
       final Uint8List byteArray = fakeMemoryImage;
       final File file = fakeFileImage;
       const String networkUrl = fakeNetworkImage;
@@ -63,36 +56,22 @@ void main() {
       );
 
       expect(
-        EditorImage(networkUrl: networkUrl).type,
+        const EditorImage(networkUrl: networkUrl).type,
         equals(EditorImageType.network),
       );
 
       expect(
-        EditorImage(assetPath: assetPath).type,
+        const EditorImage(assetPath: assetPath).type,
         equals(EditorImageType.asset),
       );
     });
 
-    testWidgets('safeByteArray should return the correct data',
-        (WidgetTester tester) async {
-      final key = GlobalKey();
+    test('safeByteArray should return the correct data', () async {
       final Uint8List byteArray = Uint8List.fromList(fakeMemoryImage);
 
       final EditorImage memoryImage = EditorImage(byteArray: byteArray);
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Builder(
-            key: key,
-            builder: (BuildContext context) {
-              return Container();
-            },
-          ),
-        ),
-      );
-
-      final Uint8List memoryData =
-          await memoryImage.safeByteArray(key.currentContext!);
+      final Uint8List memoryData = await memoryImage.safeByteArray;
       expect(memoryData, fakeMemoryImage);
     });
   });

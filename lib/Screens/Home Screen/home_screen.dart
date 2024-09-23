@@ -1,11 +1,15 @@
+import 'dart:io';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:photo_filter_app/Controller/app_provider.dart';
 import 'package:pro_image_editor/modules/filter_editor/filter_editor.dart';
-import 'package:pro_image_editor/modules/filter_editor/utils/filter_generator/filter_model.dart';
-import 'package:pro_image_editor/modules/filter_editor/utils/filter_generator/filter_presets.dart';
+import 'package:pro_image_editor/pro_image_editor.dart';
+
+import 'package:provider/provider.dart';
 
 import '../Edit Image/edit_image.dart';
 
@@ -33,6 +37,10 @@ class HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    Future.microtask((){
+      final appProvider = Provider.of<AppProvider>(context);
+    }
+    );
     _selectedCameraIndex = 0;
     _requestStoragePermission();
     _initializeCamera();
@@ -59,24 +67,31 @@ class HomeScreenState extends State<HomeScreen> {
     _initializeCamera();
   }
 
-  Future<void> _pickImageFromGallery() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
+    Future<void> _pickImageFromGallery(AppProvider provider) async {
+      final pickFile = await _picker.pickImage(source: ImageSource.gallery);
+      final File pickedFile = File(pickFile!.path);
+      provider.imageFile = pickedFile;
       setState(() {
         _isGalleryMode = true;
       });
-      _editImage(pickedFile.path);
-    }
-  }
+      _editImage(pickedFile);
+        }
 
-  Future<void> _captureImage() async {
+  Future<void> _captureImage(AppProvider provider) async {
     try {
       await _initializeControllerFuture;
-      final image = await _controller.takePicture();
+
+      final XFile image = await _controller.takePicture(); // Capture the image as XFile
+      final File imageFile = File(image.path);
+      provider.imageFile=imageFile;// Convert XFile to File
+
+      print("picked image ${imageFile.path}");
+
       setState(() {
         _isGalleryMode = true;
       });
-      _editImage(image.path);
+
+      _editImage(imageFile); // Pass the File instead of XFile
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to capture image: $e')),
@@ -84,7 +99,7 @@ class HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> _editImage(String imagePath) async {
+  Future<void> _editImage(File imagePath) async {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -109,6 +124,7 @@ class HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final appProvider = Provider.of<AppProvider>(context, listen: false);
     return Scaffold(
       body: _isGalleryMode
           ? Container()
@@ -145,7 +161,7 @@ class HomeScreenState extends State<HomeScreen> {
                   itemCount: presetFiltersList.length,
                   itemBuilder: (context, index) {
                     final filterModel = presetFiltersList[index];
-                    return _buildFilterOption(filterModel);
+                    return _buildFilterOption();
                   },
                 ),
               ),
@@ -168,7 +184,9 @@ class HomeScreenState extends State<HomeScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     IconButton(
-                      onPressed: _pickImageFromGallery,
+                      onPressed: (){
+                        _pickImageFromGallery(appProvider);
+                      },
                       icon: const Icon(
                         Icons.photo,
                         color: Colors.white,
@@ -176,7 +194,9 @@ class HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(width: 10),
                     IconButton(
-                      onPressed: _captureImage,
+                      onPressed: (){
+                        _captureImage(appProvider);
+                      },
                       icon: const FaIcon(
                         FontAwesomeIcons.circle,
                         color: Colors.white,
@@ -202,14 +222,10 @@ class HomeScreenState extends State<HomeScreen> {
   }
 
   /// Build a filter option from the `FilterModel`
-  Widget _buildFilterOption(FilterModel filterModel) {
+  Widget _buildFilterOption() {
     return GestureDetector(
       onTap: () {
-        _applyFilter(
-          ColorFilter.matrix(filterModel.filters.isNotEmpty
-              ? filterModel.filters.first
-              : List<double>.filled(20, 0.0)),
-        );
+
       },
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -219,17 +235,12 @@ class HomeScreenState extends State<HomeScreen> {
             SizedBox(
               height: 60,
               width: 60,
-              child: ColorFiltered(
-                colorFilter: ColorFilter.matrix(
-                  filterModel.filters.isNotEmpty
-                      ? filterModel.filters.first
-                      : List<double>.filled(20, 0.0),
-                ),
+
                 child: CameraPreview(_controller),
               ),
-            ),
+
             Text(
-              filterModel.name,
+              '',
               style: const TextStyle(
                 fontSize: 12,
                 color: Colors.white,

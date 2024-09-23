@@ -1,4 +1,3 @@
-// Flutter imports:
 import 'package:flutter/widgets.dart';
 
 /// Primary color used in the image editor interface.

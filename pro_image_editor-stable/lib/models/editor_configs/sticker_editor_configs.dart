@@ -1,5 +1,6 @@
-// Flutter imports:
 import 'package:flutter/widgets.dart';
+
+import '../../pro_image_editor.dart';
 
 /// Configuration options for a sticker editor.
 ///
@@ -18,24 +19,9 @@ import 'package:flutter/widgets.dart';
 /// );
 /// ```
 class StickerEditorConfigs {
-  /// Creates an instance of StickerEditorConfigs with optional settings.
-  ///
-  /// By default, the editor is disabled (if not specified), and other
-  /// properties are set to reasonable defaults.
-  const StickerEditorConfigs({
-    required this.buildStickers,
-    this.initWidth = 100,
-    this.minScale = double.negativeInfinity,
-    this.maxScale = double.infinity,
-    this.enabled = false,
-  })  : assert(initWidth > 0, 'initWidth must be positive'),
-        assert(maxScale >= minScale,
-            'maxScale must be greater than or equal to minScale');
-
   /// Indicates whether the sticker editor is enabled.
   ///
-  /// When set to `true`, the sticker editor is active and users can interact
-  /// with it.
+  /// When set to `true`, the sticker editor is active and users can interact with it.
   /// If `false`, the editor is disabled and does not respond to user inputs.
   final bool enabled;
 
@@ -53,39 +39,37 @@ class StickerEditorConfigs {
   /// and behavior of stickers in the editor.
   final BuildStickers buildStickers;
 
-  /// The minimum scale factor from the layer.
-  final double minScale;
-
-  /// The maximum scale factor from the layer.
-  final double maxScale;
-
-  /// Creates a copy of this `StickerEditorConfigs` object with the given fields
-  /// replaced with new values.
+  /// A callback triggered each time the search value changes.
   ///
-  /// The [copyWith] method allows you to create a new instance of
-  /// [StickerEditorConfigs] with some properties updated while keeping the
-  /// others unchanged.
-  StickerEditorConfigs copyWith({
-    bool? enabled,
-    double? initWidth,
-    BuildStickers? buildStickers,
-    double? minScale,
-    double? maxScale,
-  }) {
-    return StickerEditorConfigs(
-      enabled: enabled ?? this.enabled,
-      initWidth: initWidth ?? this.initWidth,
-      buildStickers: buildStickers ?? this.buildStickers,
-      minScale: minScale ?? this.minScale,
-      maxScale: maxScale ?? this.maxScale,
-    );
-  }
+  /// This callback is activated exclusively when the editor mode is set to 'WhatsApp'.
+  final Function(String value)? onSearchChanged;
+
+  /// Use this to build custom [BoxConstraints] that will be applied to
+  /// the modal bottom sheet displaying the [StickerEditor].
+  ///
+  /// Otherwise, it falls back to
+  /// [ProImageEditorConfigs.editorBoxConstraintsBuilder].
+  final EditorBoxConstraintsBuilder? editorBoxConstraintsBuilder;
+
+  /// Use this to build custom [BoxConstraints] that will be applied to
+  /// the modal bottom sheet displaying the [WhatsAppStickerPage].
+  ///
+  /// Otherwise, it falls back to either [editorBoxConstraintsBuilder] or
+  /// [ProImageEditorConfigs.editorBoxConstraintsBuilder] in that order.
+  final EditorBoxConstraintsBuilder? whatsAppEditorBoxConstraintsBuilder;
+
+  /// Creates an instance of StickerEditorConfigs with optional settings.
+  ///
+  /// By default, the editor is disabled (if not specified), and other properties
+  /// are set to reasonable defaults.
+  const StickerEditorConfigs({
+    required this.buildStickers,
+    this.onSearchChanged,
+    this.initWidth = 100,
+    this.enabled = false,
+    this.editorBoxConstraintsBuilder,
+    this.whatsAppEditorBoxConstraintsBuilder,
+  });
 }
 
-/// A typedef representing a function signature for building sticker widgets.
-///
-/// This typedef defines a function that builds a widget for stickers in an
-/// editor, allowing customization of how stickers are displayed and
-/// manipulated within the user interface.
-typedef BuildStickers = Widget Function(
-    Function(Widget) setLayer, ScrollController scrollController);
+typedef BuildStickers = Widget Function(Function(Widget) setLayer);

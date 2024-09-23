@@ -1,16 +1,12 @@
-// Flutter imports:
 import 'package:flutter/material.dart';
-
-// Package imports:
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:network_image_mock/network_image_mock.dart';
-import 'package:pro_image_editor/models/editor_configs/pro_image_editor_configs.dart';
-
-// Project imports:
 import 'package:pro_image_editor/models/editor_image.dart';
+import 'package:pro_image_editor/utils/design_mode.dart';
 import 'package:pro_image_editor/widgets/auto_image.dart';
+import 'package:mockito/annotations.dart';
+
 import '../fake/fake_image.dart';
 import 'auto_image_test.mocks.dart';
 
@@ -26,7 +22,7 @@ void main() {
       await tester.pumpWidget(
         AutoImage(
           mockEditorImage,
-          configs: const ProImageEditorConfigs(),
+          designMode: ImageEditorDesignModeE.material,
         ),
       );
 
@@ -40,7 +36,7 @@ void main() {
       await tester.pumpWidget(
         AutoImage(
           mockEditorImage,
-          configs: const ProImageEditorConfigs(),
+          designMode: ImageEditorDesignModeE.material,
         ),
       );
 
@@ -48,14 +44,14 @@ void main() {
     });
 
     testWidgets('displays image from network', (WidgetTester tester) async {
-      await mockNetworkImagesFor(() async {
+      mockNetworkImagesFor(() async {
         when(mockEditorImage.type).thenReturn(EditorImageType.network);
         when(mockEditorImage.networkUrl).thenReturn(fakeNetworkImage);
 
         await tester.pumpWidget(
           AutoImage(
             mockEditorImage,
-            configs: const ProImageEditorConfigs(),
+            designMode: ImageEditorDesignModeE.material,
           ),
         );
 

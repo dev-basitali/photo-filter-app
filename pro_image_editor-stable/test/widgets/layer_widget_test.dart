@@ -1,10 +1,6 @@
-// Flutter imports:
 import 'package:flutter/material.dart';
-
-// Package imports:
 import 'package:flutter_test/flutter_test.dart';
-
-// Project imports:
+import 'package:pro_image_editor/models/layer.dart';
 import 'package:pro_image_editor/pro_image_editor.dart';
 import 'package:pro_image_editor/widgets/layer_widget.dart';
 
@@ -29,13 +25,19 @@ void main() {
           body: Stack(
             children: [
               LayerWidget(
-                editorCenterX: 250,
-                editorCenterY: 250,
                 layerData: layer,
-                configs: const ProImageEditorConfigs(),
-                onTap: (Layer tapLayer) {
-                  expect(layer, equals(tapLayer));
+                padding: EdgeInsets.zero,
+                onTapDown: () {},
+                onTapUp: () {},
+                onTap: (Layer layer) {
+                  expect(layer, equals(layer));
                 },
+                configs: const ProImageEditorConfigs(),
+                onEditTap: () {},
+                onRemoveTap: () {},
+                enableHitDetection: true,
+                freeStyleHighPerformanceScaling: true,
+                freeStyleHighPerformanceMoving: true,
               ),
             ],
           ),

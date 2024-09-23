@@ -1,112 +1,62 @@
-// Dart imports:
 import 'dart:math';
 
-// Flutter imports:
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:pro_image_editor/plugins/rounded_background_text/src/rounded_background_text.dart';
+import 'package:pro_image_editor/models/editor_configs/pro_image_editor_configs.dart';
+import 'package:pro_image_editor/utils/theme_functions.dart';
+import 'package:rounded_background_text/rounded_background_text.dart';
 
-// Project imports:
-import 'package:pro_image_editor/pro_image_editor.dart';
 import '../mixins/converted_configs.dart';
 import '../mixins/editor_configs_mixin.dart';
-import '../utils/theme_functions.dart';
+import '../models/layer.dart';
+import '../modules/paint_editor/utils/draw/draw_canvas.dart';
+import '../modules/paint_editor/utils/paint_editor_enum.dart';
 import 'layer_interaction_helper/layer_interaction_helper_widget.dart';
+import 'pro_image_editor_desktop_mode.dart';
 
 /// A widget representing a layer within a design canvas.
 class LayerWidget extends StatefulWidget with SimpleConfigsAccess {
-  /// Creates a [LayerWidget] with the specified properties.
-  const LayerWidget({
-    super.key,
-    this.onScaleRotateDown,
-    this.onScaleRotateUp,
-    required this.editorCenterX,
-    required this.editorCenterY,
-    required this.configs,
-    required this.layerData,
-    this.onTapDown,
-    this.onTapUp,
-    this.onTap,
-    this.onEditTap,
-    this.onRemoveTap,
-    this.highPerformanceMode = false,
-    this.enableHitDetection = false,
-    this.selected = false,
-    this.isInteractive = false,
-    this.callbacks = const ProImageEditorCallbacks(),
-  });
   @override
   final ProImageEditorConfigs configs;
-
-  @override
-  final ProImageEditorCallbacks callbacks;
-
-  /// The x-coordinate of the editor's center.
-  ///
-  /// This parameter specifies the horizontal center of the editor's body in
-  /// logical pixels, used to position and transform layers relative to the
-  /// editor's center.
-  final double editorCenterX;
-
-  /// The y-coordinate of the editor's center.
-  ///
-  /// This parameter specifies the vertical center of the editor's body in
-  /// logical pixels,  used to position and transform layers relative to the
-  /// editor's center.
-  final double editorCenterY;
 
   /// Data for the layer.
   final Layer layerData;
 
   /// Callback when a tap down event occurs.
-  final Function()? onTapDown;
+  final Function() onTapDown;
 
   /// Callback when a tap up event occurs.
-  final Function()? onTapUp;
+  final Function() onTapUp;
 
   /// Callback when a tap event occurs.
-  final Function(Layer)? onTap;
+  final Function(Layer) onTap;
 
   /// Callback for removing the layer.
-  final Function()? onRemoveTap;
+  final Function() onRemoveTap;
 
   /// Callback for editing the layer.
-  final Function()? onEditTap;
+  final Function() onEditTap;
 
-  /// Callback for handling pointer down events associated with scale and rotate
-  /// gestures.
-  ///
-  /// This callback is triggered when the user presses down on the widget to
-  /// begin a scaling or rotating gesture. It provides both the pointer event
-  /// and the size of the widget being interacted with, allowing for precise
-  /// manipulation.
-  ///
-  /// - Parameters:
-  ///   - event: The [PointerDownEvent] containing details about the pointer
-  ///     interaction, such as position and device type.
-  ///   - size: The [Size] of the widget being manipulated, useful for
-  ///     calculating scaling and rotation transformations relative to the
-  ///     widget's dimensions.
   final Function(PointerDownEvent, Size)? onScaleRotateDown;
-
-  /// Callback for handling pointer up events associated with scale and rotate
-  /// gestures.
-  ///
-  /// This callback is triggered when the user releases the widget after a
-  /// scaling or rotating gesture. It allows for finalizing the interaction and
-  /// making any necessary updates or state changes based on the completed
-  /// gesture.
-  ///
-  /// - Parameter event: The [PointerUpEvent] containing details about the
-  ///   pointer release, such as position and device type.
   final Function(PointerUpEvent)? onScaleRotateUp;
 
-  /// Controls high-performance for free-style drawing.
-  final bool highPerformanceMode;
+  /// Padding for positioning the layer within the canvas.
+  final EdgeInsets padding;
+
+  /// Enables high-performance scaling for free-style drawing when set to `true`.
+  ///
+  /// When this option is enabled, it optimizes scaling for improved performance.
+  /// By default, it's set to `true` on mobile devices and `false` on desktop devices.
+  final bool freeStyleHighPerformanceScaling;
+
+  /// Enables high-performance moving for free-style drawing when set to `true`.
+  ///
+  /// When this option is enabled, it optimizes moving for improved performance.
+  /// By default, it's set to `true` only on mobile-web devices.
+  final bool freeStyleHighPerformanceMoving;
 
   /// Enables or disables hit detection.
-  /// When set to `true`, it allows detecting user interactions with the
-  /// interface.
+  /// When set to `true`, it allows detecting user interactions with the interface.
   final bool enableHitDetection;
 
   /// Indicates whether the layer is selected.
@@ -114,6 +64,26 @@ class LayerWidget extends StatefulWidget with SimpleConfigsAccess {
 
   /// Indicates whether the layer is interactive.
   final bool isInteractive;
+
+  /// Creates a [LayerWidget] with the specified properties.
+  const LayerWidget({
+    super.key,
+    this.onScaleRotateDown,
+    this.onScaleRotateUp,
+    required this.configs,
+    required this.padding,
+    required this.layerData,
+    required this.onTapDown,
+    required this.onTapUp,
+    required this.onTap,
+    required this.onEditTap,
+    required this.onRemoveTap,
+    required this.enableHitDetection,
+    required this.freeStyleHighPerformanceScaling,
+    required this.freeStyleHighPerformanceMoving,
+    this.selected = false,
+    this.isInteractive = false,
+  });
 
   @override
   createState() => _LayerWidgetState();
@@ -180,7 +150,7 @@ class _LayerWidgetState extends State<LayerWidget>
       ],
     ).then((String? selectedValue) {
       if (selectedValue != null) {
-        widget.onRemoveTap?.call();
+        widget.onRemoveTap();
       }
     });
   }
@@ -188,20 +158,20 @@ class _LayerWidgetState extends State<LayerWidget>
   /// Handles a tap event on the layer.
   void _onTap() {
     if (_checkHitIsOutsideInCanvas()) return;
-    widget.onTap?.call(_layer);
+    widget.onTap(_layer);
   }
 
   /// Handles a pointer down event on the layer.
   void _onPointerDown(PointerDownEvent event) {
     if (_checkHitIsOutsideInCanvas()) return;
     if (!isDesktop || event.buttons != kSecondaryMouseButton) {
-      widget.onTapDown?.call();
+      widget.onTapDown();
     }
   }
 
   /// Handles a pointer up event on the layer.
   void _onPointerUp(PointerUpEvent event) {
-    widget.onTapUp?.call();
+    widget.onTapUp();
   }
 
   /// Checks if the hit is outside the canvas for certain types of layers.
@@ -210,8 +180,7 @@ class _LayerWidgetState extends State<LayerWidget>
         !(_layer as PaintingLayerData).item.hit;
   }
 
-  /// Calculates the transformation matrix for the layer's position and
-  /// rotation.
+  /// Calculates the transformation matrix for the layer's position and rotation.
   Matrix4 _calcTransformMatrix() {
     return Matrix4.identity()
       ..setEntry(3, 2, 0.001) // Add a small z-offset to avoid rendering issues
@@ -224,10 +193,10 @@ class _LayerWidgetState extends State<LayerWidget>
   Layer get _layer => widget.layerData;
 
   /// Calculates the horizontal offset for the layer.
-  double get offsetX => _layer.offset.dx + widget.editorCenterX;
+  double get offsetX => _layer.offset.dx + widget.padding.left;
 
   /// Calculates the vertical offset for the layer.
-  double get offsetY => _layer.offset.dy + widget.editorCenterY;
+  double get offsetY => _layer.offset.dy + widget.padding.top;
 
   @override
   Widget build(BuildContext context) {
@@ -248,7 +217,7 @@ class _LayerWidgetState extends State<LayerWidget>
     return Hero(
       key: _layerKey,
       createRectTween: (begin, end) => RectTween(begin: begin, end: end),
-      tag: widget.layerData.id,
+      tag: widget.layerData.hashCode,
       child: Transform(
         transform: transformMatrix,
         alignment: Alignment.center,
@@ -257,7 +226,6 @@ class _LayerWidgetState extends State<LayerWidget>
             LayerInteractionHelperWidget(
               layerData: widget.layerData,
               configs: configs,
-              callbacks: callbacks,
               selected: widget.selected,
               onEditLayer: widget.onEditTap,
               isInteractive: widget.isInteractive,
@@ -306,6 +274,24 @@ class _LayerWidgetState extends State<LayerWidget>
                 ),
               ),
             ),
+            /*     Positioned(
+              bottom: imageEditorTheme.layerInteraction.buttonRadius + imageEditorTheme.layerInteraction.strokeWidth * 2,
+              right: imageEditorTheme.layerInteraction.buttonRadius + imageEditorTheme.layerInteraction.strokeWidth * 2,
+              child: Container(
+                width: 105.7,
+                height: 115,
+                color: Colors.amber,
+              ),
+            ),
+            Positioned(
+              top: imageEditorTheme.layerInteraction.buttonRadius + imageEditorTheme.layerInteraction.strokeWidth * 2,
+              left: imageEditorTheme.layerInteraction.buttonRadius + imageEditorTheme.layerInteraction.strokeWidth * 2,
+              child: Container(
+                width: 105.7,
+                height: 115,
+                color: Colors.deepOrange,
+              ),
+            ), */
           ],
         ),
       ),
@@ -334,7 +320,9 @@ class _LayerWidgetState extends State<LayerWidget>
       text: span,
       textAlign: TextAlign.left,
       textDirection: TextDirection.ltr,
-    )..layout();
+    );
+
+    painter.layout();
     return painter.preferredLineHeight;
   }
 
@@ -344,6 +332,7 @@ class _LayerWidgetState extends State<LayerWidget>
     var layer = _layer as TextLayerData;
     var style = TextStyle(
       fontSize: fontSize * layer.fontScale,
+      fontWeight: FontWeight.w400,
       color: layer.color,
       overflow: TextOverflow.ellipsis,
     );
@@ -358,20 +347,17 @@ class _LayerWidgetState extends State<LayerWidget>
         right: height * horizontalPaddingFactor,
         bottom: height * 0.175 / 2,
       ),
-      child: HeroMode(
-        enabled: false,
-        child: RoundedBackgroundText(
-          layer.text.toString(),
-          backgroundColor: layer.background,
-          textAlign: layer.align,
-          style: layer.textStyle?.copyWith(
-                fontSize: style.fontSize,
-                fontWeight: style.fontWeight,
-                color: style.color,
-                fontFamily: style.fontFamily,
-              ) ??
-              style,
-        ),
+      child: RoundedBackgroundText(
+        layer.text.toString(),
+        backgroundColor: layer.background,
+        textAlign: layer.align,
+        style: layer.textStyle?.copyWith(
+              fontSize: style.fontSize,
+              fontWeight: style.fontWeight,
+              color: style.color,
+              fontFamily: style.fontFamily,
+            ) ??
+            style,
       ),
     );
   }
@@ -411,21 +397,17 @@ class _LayerWidgetState extends State<LayerWidget>
     return Padding(
       // Better hit detection for mobile devices
       padding: EdgeInsets.all(isDesktop ? 0 : 15),
-      child: RepaintBoundary(
-        child: Opacity(
-          opacity: layer.opacity,
-          child: CustomPaint(
-            size: layer.size,
-            willChange: false,
-            isComplex: layer.item.mode == PaintModeE.freeStyle,
-            painter: DrawPainting(
-              item: layer.item,
-              scale: widget.layerData.scale,
-              selected: widget.selected,
-              enabledHitDetection: widget.enableHitDetection,
-              freeStyleHighPerformance: widget.highPerformanceMode,
-            ),
-          ),
+      child: CustomPaint(
+        size: layer.size,
+        willChange: true,
+        isComplex: layer.item.mode == PaintModeE.freeStyle,
+        painter: DrawCanvas(
+          item: layer.item,
+          scale: widget.layerData.scale,
+          enabledHitDetection: widget.enableHitDetection,
+          freeStyleHighPerformanceScaling:
+              widget.freeStyleHighPerformanceScaling,
+          freeStyleHighPerformanceMoving: widget.freeStyleHighPerformanceMoving,
         ),
       ),
     );
@@ -434,3 +416,11 @@ class _LayerWidgetState extends State<LayerWidget>
 
 // ignore: camel_case_types
 enum _LayerType { emoji, text, sticker, canvas, unknown }
+
+/// Enumeration for controlling the background color mode of the text layer.
+enum LayerBackgroundColorModeE {
+  background,
+  backgroundAndColor,
+  backgroundAndColorWithOpacity,
+  onlyColor,
+}

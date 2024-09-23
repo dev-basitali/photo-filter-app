@@ -1,36 +1,27 @@
-// Dart imports:
 import 'dart:ui';
 
-// Flutter imports:
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
-// Project imports:
-import 'package:pro_image_editor/models/editor_callbacks/pro_image_editor_callbacks.dart';
 import 'package:pro_image_editor/modules/emoji_editor/emoji_editor.dart';
-import 'package:pro_image_editor/modules/sticker_editor/sticker_editor.dart';
+import 'package:pro_image_editor/modules/sticker_editor.dart';
+import 'package:pro_image_editor/utils/design_mode.dart';
+
 import '../../models/editor_configs/pro_image_editor_configs.dart';
 
 /// Represents the temporary sticker mode for WhatsApp.
 ///
-/// This variable defines the temporary sticker mode for WhatsApp, indicating
-/// whether stickers or emojis are being used.
+/// This variable defines the temporary sticker mode for WhatsApp, indicating whether stickers or emojis are being used.
 WhatsAppStickerMode whatsAppTemporaryStickerMode = WhatsAppStickerMode.sticker;
 
 /// Represents the sticker-editor page for the WhatsApp theme.
 class WhatsAppStickerPage extends StatefulWidget {
-  /// Creates a [WhatsAppStickerPage] widget.
-  const WhatsAppStickerPage({
-    super.key,
-    required this.configs,
-    required this.callbacks,
-  });
-
   /// The configuration for the image editor.
   final ProImageEditorConfigs configs;
 
-  /// The callbacks from the image editor.
-  final ProImageEditorCallbacks callbacks;
+  const WhatsAppStickerPage({
+    super.key,
+    required this.configs,
+  });
 
   @override
   State<WhatsAppStickerPage> createState() => _WhatsAppStickerPageState();
@@ -38,7 +29,6 @@ class WhatsAppStickerPage extends StatefulWidget {
 
 class _WhatsAppStickerPageState extends State<WhatsAppStickerPage> {
   final _emojiEditorKey = GlobalKey<EmojiEditorState>();
-  final _stickerScrollController = ScrollController();
   bool _activeSearch = false;
   late TextEditingController _searchCtrl;
   late FocusNode _searchFocus;
@@ -57,7 +47,6 @@ class _WhatsAppStickerPageState extends State<WhatsAppStickerPage> {
   void dispose() {
     _searchCtrl.dispose();
     _searchFocus.dispose();
-    _stickerScrollController.dispose();
     super.dispose();
   }
 
@@ -92,7 +81,6 @@ class _WhatsAppStickerPageState extends State<WhatsAppStickerPage> {
                             WhatsAppStickerMode.sticker,
                         child: StickerEditor(
                           configs: widget.configs,
-                          scrollController: _stickerScrollController,
                         ),
                       ),
                   ],
@@ -124,7 +112,7 @@ class _WhatsAppStickerPageState extends State<WhatsAppStickerPage> {
                   setState(() {
                     _searchCtrl.clear();
                     _activeSearch = false;
-                    widget.callbacks.stickerEditorCallbacks?.onSearchChanged
+                    widget.configs.stickerEditorConfigs?.onSearchChanged
                         ?.call('');
                   });
                 } else {
@@ -185,7 +173,7 @@ class _WhatsAppStickerPageState extends State<WhatsAppStickerPage> {
                             minimumSize: Size.zero,
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
-                          segments: [
+                          segments: <ButtonSegment>[
                             ButtonSegment(
                               value: WhatsAppStickerMode.sticker,
                               label: Text(
@@ -208,7 +196,7 @@ class _WhatsAppStickerPageState extends State<WhatsAppStickerPage> {
                             ),
                           ],
                           selected: {whatsAppTemporaryStickerMode},
-                          onSelectionChanged: (newSelection) {
+                          onSelectionChanged: (Set newSelection) {
                             setState(() {
                               whatsAppTemporaryStickerMode = newSelection.first;
                             });
@@ -351,7 +339,7 @@ class _WhatsAppStickerPageState extends State<WhatsAppStickerPage> {
                 focusNode: _searchFocus,
                 onChanged: (value) {
                   _emojiEditorKey.currentState?.externSearch(value);
-                  widget.callbacks.stickerEditorCallbacks?.onSearchChanged
+                  widget.configs.stickerEditorConfigs?.onSearchChanged
                       ?.call(value);
                   _searchFocus.requestFocus();
                   Future.delayed(const Duration(milliseconds: 1))
@@ -394,7 +382,7 @@ class _WhatsAppStickerPageState extends State<WhatsAppStickerPage> {
                   focusNode: _searchFocus,
                   onChanged: (value) {
                     _emojiEditorKey.currentState?.externSearch(value);
-                    widget.callbacks.stickerEditorCallbacks?.onSearchChanged
+                    widget.configs.stickerEditorConfigs?.onSearchChanged
                         ?.call(value);
                     _searchFocus.requestFocus();
                   },
@@ -412,7 +400,7 @@ class _WhatsAppStickerPageState extends State<WhatsAppStickerPage> {
                 setState(() {
                   if (_searchCtrl.text.isNotEmpty) {
                     _searchCtrl.clear();
-                    widget.callbacks.stickerEditorCallbacks?.onSearchChanged
+                    widget.configs.stickerEditorConfigs?.onSearchChanged
                         ?.call('');
                   } else {
                     _activeSearch = false;
@@ -427,20 +415,7 @@ class _WhatsAppStickerPageState extends State<WhatsAppStickerPage> {
   }
 }
 
-/// An enumeration representing the modes for WhatsApp sticker functionality.
-///
-/// This enum defines the available modes for adding visual elements, such as
-/// stickers or emojis, to images within the WhatsApp-themed editor.
 enum WhatsAppStickerMode {
-  /// Mode for adding stickers.
-  ///
-  /// This mode allows the user to select and place various stickers on an
-  /// image, enhancing the visual content with decorative elements.
   sticker,
-
-  /// Mode for adding emojis.
-  ///
-  /// This mode allows the user to select and place emojis on an image,
-  /// providing a fun and expressive way to enhance visual content.
   emoji,
 }

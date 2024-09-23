@@ -1,14 +1,9 @@
-// Flutter imports:
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-
-// Package imports:
 import 'package:flutter_test/flutter_test.dart';
-
-// Project imports:
 import 'package:pro_image_editor/models/paint_editor/painted_model.dart';
+import 'package:pro_image_editor/modules/paint_editor/utils/draw/draw_canvas.dart';
 import 'package:pro_image_editor/modules/paint_editor/utils/paint_editor_enum.dart';
-import 'package:pro_image_editor/modules/paint_editor/widgets/draw_painting.dart';
 
 void main() {
   testWidgets('DrawCanvas should handle hit testing for different modes',
@@ -31,18 +26,18 @@ void main() {
         offsets: [const Offset(0, 0), const Offset(50, 50)],
         strokeWidth: 5.0,
         fill: true,
-        opacity: 1,
       );
 
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: CustomPaint(
-              painter: DrawPainting(
+              painter: DrawCanvas(
                 item: paintedModel,
                 scale: 1.0,
                 enabledHitDetection: true,
-                freeStyleHighPerformance: true,
+                freeStyleHighPerformanceScaling: true,
+                freeStyleHighPerformanceMoving: true,
               ),
             ),
           ),

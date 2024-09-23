@@ -1,84 +1,30 @@
-// Flutter imports:
 import 'package:flutter/material.dart';
 
-// Project imports:
 import '../../../models/paint_editor/painted_model.dart';
 import 'paint_editor_enum.dart';
 
-/// The `PaintingController` class is responsible for managing and controlling
-/// the painting state.
+/// The `PaintingController` class is responsible for managing and controlling the painting state in a Flutter application.
 class PaintingController extends ChangeNotifier {
-  /// Creates an instance of the `PaintingController` with initial settings.
-  ///
-  /// - `strokeWidth`: The initial stroke width.
-  /// - `color`: The initial color.
-  /// - `mode`: The initial painting mode (e.g., line, circle, rectangle).
-  /// - `fill`: Whether the initial mode should fill the shape
-  /// (e.g., circle or rectangle).
-  /// - `strokeMultiplier`: The multiplier for the stroke width.
-  PaintingController({
-    required double strokeWidth,
-    required Color color,
-    required PaintModeE mode,
-    required bool fill,
-    required int strokeMultiplier,
-    required this.opacity,
-  }) {
-    _strokeWidth = strokeWidth;
-    _color = color;
-    _mode = mode;
-    _fill = fill;
-    _strokeMultiplier = strokeMultiplier;
-  }
-
-  /// The width of the stroke for painting operations.
   late double _strokeWidth;
-
-  /// The color used for painting operations.
   late Color _color;
-
-  /// The mode of painting, specifying the type of painting operation.
   late PaintModeE _mode;
-
-  /// A flag indicating whether painting operations should fill shapes.
   late bool _fill;
 
-  /// The opacity for the drawing
-  late double opacity;
-
-  /// List of offsets representing points on the canvas during painting.
   final List<Offset?> _offsets = [];
 
-  /// History of painted models representing previous painting operations.
-  final List<List<PaintedModel>> paintHistory = [];
+  final List<PaintedModel> _paintHistory = [];
+  final List<PaintedModel> _paintRedoHistory = [];
 
-  /// The current position in the painting history.
-  int historyPosition = 0;
+  Offset? _start, _end;
 
-  /// The starting point of the current painting operation.
-  Offset? _start;
-
-  /// The ending point of the current painting operation.
-  Offset? _end;
-
-  /// Multiplier for stroke width, used in scaling the stroke.
   int _strokeMultiplier = 1;
-
-  /// Flag indicating whether a painting operation is in progress.
   bool _paintInProgress = false;
 
-  /// Getter for the current state of the painted model.
-  ///
-  /// Returns a [PaintedModel] instance representing the current state of the
-  /// painting.
-  PaintedModel get paintedModel => PaintedModel(
-        mode: mode,
-        offsets: mode == PaintModeE.freeStyle ? offsets : [start, end],
-        color: color,
-        strokeWidth: strokeWidth,
-        fill: fill,
-        opacity: opacity,
-      );
+  /// Returns a [Paint] object configured with the current color, stroke width, and fill settings.
+  Paint get brush => Paint()
+    ..color = _color
+    ..strokeWidth = _strokeWidth * _strokeMultiplier
+    ..style = needFill ? PaintingStyle.fill : PaintingStyle.stroke;
 
   /// Returns the current painting mode (e.g., line, circle, rectangle).
   PaintModeE get mode => _mode;
@@ -92,18 +38,17 @@ class PaintingController extends ChangeNotifier {
   /// Indicates whether there is an ongoing painting action.
   bool get busy => _paintInProgress;
 
-  /// Indicates whether the current mode requires filling
-  /// (e.g., circle or rectangle).
+  /// Indicates whether the current mode requires filling (e.g., circle or rectangle).
   bool get fill => _fill;
 
   /// Returns the current color used for painting.
   Color get color => _color;
 
   /// Returns the list of painted models representing the painting history.
-  List<PaintedModel> get activePaintings =>
-      historyPosition <= 0 || paintHistory.length < historyPosition
-          ? []
-          : paintHistory[historyPosition - 1];
+  List<PaintedModel> get paintHistory => _paintHistory;
+
+  /// Returns the list of painted models representing the redo history.
+  List<PaintedModel> get paintRedoHistory => _paintRedoHistory;
 
   /// Returns the list of recorded painting offsets.
   List<Offset?> get offsets => _offsets;
@@ -114,58 +59,54 @@ class PaintingController extends ChangeNotifier {
   /// Returns the ending point of a painting action.
   Offset? get end => _end;
 
-  /// Determines whether undo actions can be performed on the current state.
-  bool get canUndo => historyPosition > 0;
-
-  /// Determines whether redo actions can be performed on the current state.
-  bool get canRedo => historyPosition < paintHistory.length;
-
-  /// Adds a painted model to the painting history and notifies listeners of
-  /// the change.
-  void addPaintInfo(PaintedModel paintInfo) {
-    _cleanForwardChanges();
-    paintHistory.add([...activePaintings, paintInfo]);
-    historyPosition++;
-  }
-
-  /// Adds a painted model to the painting history and notifies listeners of
-  /// the change.
-  void removeLayers(List<String> idList) {
-    _cleanForwardChanges();
-    paintHistory.add([...activePaintings]);
-    historyPosition++;
-    activePaintings.removeWhere((el) => idList.contains(el.id));
-  }
-
-  /// Clean forward changes in the history.
+  /// Creates an instance of the `PaintingController` with initial settings.
   ///
-  /// This method removes any changes made after the current edit position in
-  /// the history.
-  /// It ensures that the state history and screenshots are consistent with the
-  /// current position. This is useful when performing an undo operation, and
-  /// new edits are made, effectively discarding the "redo" history.
-  void _cleanForwardChanges() {
-    if (paintHistory.isNotEmpty) {
-      while (paintHistory.length > historyPosition) {
-        paintHistory.removeLast();
-      }
-    }
-    historyPosition = paintHistory.length;
+  /// - [strokeWidth]: The initial stroke width.
+  /// - [color]: The initial color.
+  /// - [mode]: The initial painting mode (e.g., line, circle, rectangle).
+  /// - [fill]: Whether the initial mode should fill the shape (e.g., circle or rectangle).
+  /// - [strokeMultiplier]: The multiplier for the stroke width.
+  PaintingController({
+    required double strokeWidth,
+    required Color color,
+    required PaintModeE mode,
+    required bool fill,
+    required int strokeMultiplier,
+  }) {
+    _strokeWidth = strokeWidth;
+    _color = color;
+    _mode = mode;
+    _fill = fill;
+    _strokeMultiplier = strokeMultiplier;
   }
 
-  /// Undoes the last painting action by moving it from the history to the
-  /// redo history and notifies listeners.
+  /// Adds a painted model to the painting history and notifies listeners of the change.
+  void addPaintInfo(PaintedModel paintInfo) {
+    _paintHistory.add(paintInfo);
+    notifyListeners();
+  }
+
+  /// Undoes the last painting action by moving it from the history to the redo history and notifies listeners.
   void undo() {
-    if (historyPosition > 0) {
-      historyPosition--;
+    if (_paintHistory.isNotEmpty) {
+      _paintRedoHistory.add(_paintHistory.removeLast());
+      notifyListeners();
     }
   }
 
-  /// Redoes the last undone painting action by moving it from the redo history
-  /// to the history and notifies listeners.
+  /// Redoes the last undone painting action by moving it from the redo history to the history and notifies listeners.
   void redo() {
-    if (historyPosition < paintHistory.length) {
-      historyPosition++;
+    if (_paintRedoHistory.isNotEmpty) {
+      _paintHistory.add(_paintRedoHistory.removeLast());
+      notifyListeners();
+    }
+  }
+
+  /// Clears the painting history and notifies listeners.
+  void clear() {
+    if (_paintHistory.isNotEmpty) {
+      _paintHistory.clear();
+      notifyListeners();
     }
   }
 
@@ -211,25 +152,33 @@ class PaintingController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Resets the starting and ending points and clears the offsets list, then
-  /// notifies listeners.
-  void reset() {
+  /// Resets the starting and ending points and clears the offsets list, then notifies listeners.
+  void resetStartAndEnd() {
     _start = null;
     _end = null;
     offsets.clear();
     notifyListeners();
   }
 
-  /// Sets whether the current mode should fill the shape and notifies
-  /// listeners.
+  /// Sets whether the current mode should fill the shape and notifies listeners.
   void setFill(bool fill) {
     _fill = fill;
     notifyListeners();
   }
 
-  /// Sets the current level of opacity.
-  void setOpacity(double value) {
-    opacity = value;
+  /// Initializes the painting settings with optional parameters and notifies listeners.
+  ///
+  /// - [strokeWidth]: The optional stroke width to set.
+  /// - [color]: The optional color to set.
+  /// - [mode]: The optional painting mode to set.
+  void init({
+    double? strokeWidth,
+    Color? color,
+    PaintModeE? mode,
+  }) {
+    _strokeWidth = strokeWidth ?? _strokeWidth;
+    _color = color ?? _color;
+    _mode = mode ?? _mode;
     notifyListeners();
   }
 
@@ -240,4 +189,8 @@ class PaintingController extends ChangeNotifier {
     _paintInProgress = val;
     notifyListeners();
   }
+
+  /// Indicates whether the current mode requires filling (e.g., circle or rectangle).
+  bool get needFill =>
+      mode == PaintModeE.circle || mode == PaintModeE.rect ? fill : false;
 }

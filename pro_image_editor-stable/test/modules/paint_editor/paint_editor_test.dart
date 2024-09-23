@@ -1,15 +1,11 @@
-// Flutter imports:
 import 'package:flutter/material.dart';
-
-// Package imports:
 import 'package:flutter_test/flutter_test.dart';
 import 'package:network_image_mock/network_image_mock.dart';
-
-// Project imports:
 import 'package:pro_image_editor/models/init_configs/paint_editor_init_configs.dart';
 import 'package:pro_image_editor/modules/paint_editor/paint_editor.dart';
-import 'package:pro_image_editor/modules/paint_editor/widgets/painting_canvas.dart';
+import 'package:pro_image_editor/modules/paint_editor/painting_canvas.dart';
 import 'package:pro_image_editor/widgets/color_picker/bar_color_picker.dart';
+
 import '../../fake/fake_image.dart';
 
 void main() {
@@ -21,6 +17,7 @@ void main() {
           fakeMemoryImage,
           initConfigs: PaintEditorInitConfigs(
             theme: ThemeData(),
+            imageSize: const Size(200, 200),
           ),
         ),
       ));
@@ -29,12 +26,13 @@ void main() {
     });
     testWidgets('Initializes with network constructor',
         (WidgetTester tester) async {
-      await mockNetworkImagesFor(() async {
+      mockNetworkImagesFor(() async {
         await tester.pumpWidget(MaterialApp(
           home: PaintingEditor.network(
             fakeNetworkImage,
             initConfigs: PaintEditorInitConfigs(
               theme: ThemeData(),
+              imageSize: const Size(200, 200),
             ),
           ),
         ));
@@ -49,6 +47,7 @@ void main() {
           fakeFileImage,
           initConfigs: PaintEditorInitConfigs(
             theme: ThemeData(),
+            imageSize: const Size(200, 200),
           ),
         ),
       ));
@@ -62,6 +61,7 @@ void main() {
           fakeMemoryImage,
           initConfigs: PaintEditorInitConfigs(
             theme: ThemeData(),
+            imageSize: const Size(200, 200),
           ),
         ),
       ));
@@ -74,71 +74,12 @@ void main() {
           fakeMemoryImage,
           initConfigs: PaintEditorInitConfigs(
             theme: ThemeData(),
+            imageSize: const Size(200, 200),
           ),
         ),
       ));
 
       expect(find.byType(PaintingCanvas), findsOneWidget);
-    });
-    testWidgets('should change painting-mode', (WidgetTester tester) async {
-      var key = GlobalKey<PaintingEditorState>();
-      await tester.pumpWidget(MaterialApp(
-        home: PaintingEditor.memory(
-          fakeMemoryImage,
-          key: key,
-          initConfigs: PaintEditorInitConfigs(
-            theme: ThemeData(),
-          ),
-        ),
-      ));
-
-      /// Test if paintModes will change correctly
-      key.currentState!.setMode(PaintModeE.freeStyle);
-      expect(key.currentState!.paintMode, PaintModeE.freeStyle);
-
-      key.currentState!.setMode(PaintModeE.dashLine);
-      expect(key.currentState!.paintMode, PaintModeE.dashLine);
-
-      key.currentState!.setMode(PaintModeE.arrow);
-      expect(key.currentState!.paintMode, PaintModeE.arrow);
-    });
-    testWidgets('should change stroke width', (WidgetTester tester) async {
-      var key = GlobalKey<PaintingEditorState>();
-      await tester.pumpWidget(MaterialApp(
-        home: PaintingEditor.memory(
-          fakeMemoryImage,
-          key: key,
-          initConfigs: PaintEditorInitConfigs(
-            theme: ThemeData(),
-          ),
-        ),
-      ));
-
-      /// Test if paintModes will change correctly
-      for (double i = 1; i <= 10; i++) {
-        key.currentState!.setStrokeWidth(i);
-        expect(key.currentState!.strokeWidth, i);
-      }
-    });
-    testWidgets('should toggle fill state', (WidgetTester tester) async {
-      var key = GlobalKey<PaintingEditorState>();
-      await tester.pumpWidget(MaterialApp(
-        home: PaintingEditor.memory(
-          fakeMemoryImage,
-          key: key,
-          initConfigs: PaintEditorInitConfigs(
-            theme: ThemeData(),
-          ),
-        ),
-      ));
-
-      bool filled = key.currentState!.fillBackground;
-
-      key.currentState!.toggleFill();
-      expect(key.currentState!.fillBackground, !filled);
-
-      key.currentState!.toggleFill();
-      expect(key.currentState!.fillBackground, filled);
     });
   });
 }

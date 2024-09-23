@@ -1,4 +1,3 @@
-// Project imports:
 import 'utils/export_import_enum.dart';
 
 /// Configuration options for exporting editor contents.
@@ -6,17 +5,6 @@ import 'utils/export_import_enum.dart';
 /// This class defines various options for exporting editor contents such as
 /// paintings, text, crop/rotate actions, filters, emojis, and stickers.
 class ExportEditorConfigs {
-  /// Creates an instance of the [ExportEditorConfigs]
-  const ExportEditorConfigs({
-    this.historySpan = ExportHistorySpan.all,
-    this.exportPainting = true,
-    this.exportText = true,
-    this.exportCropRotate = true,
-    this.exportFilter = true,
-    this.exportEmoji = true,
-    this.exportSticker = true,
-  });
-
   /// The span of the export history to include in the export.
   ///
   /// By default, it includes the entire export history.
@@ -34,7 +22,9 @@ class ExportEditorConfigs {
 
   /// Whether to export the crop and rotate actions.
   ///
-  /// Defaults to `true`.
+  /// Defaults to `false`.
+  ///
+  /// Warning: Exporting cropRotate may result in increased file size.
   final bool exportCropRotate;
 
   /// Whether to export the applied filters.
@@ -53,4 +43,14 @@ class ExportEditorConfigs {
   ///
   /// Warning: Exporting stickers may result in increased file size.
   final bool exportSticker;
+
+  const ExportEditorConfigs({
+    this.historySpan = ExportHistorySpan.all,
+    this.exportPainting = true,
+    this.exportText = true,
+    this.exportCropRotate = false,
+    this.exportFilter = true,
+    this.exportEmoji = true,
+    this.exportSticker = true,
+  });
 }

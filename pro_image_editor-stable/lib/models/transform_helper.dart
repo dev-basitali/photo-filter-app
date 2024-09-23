@@ -1,100 +1,91 @@
-// Dart imports:
 import 'dart:ui';
 
-// Project imports:
-import 'package:pro_image_editor/models/crop_rotate_editor/transform_factors.dart';
-
-/// A helper class for managing transformation calculations in the image editor.
-///
-/// This class provides utilities for handling transformations related to the
-/// image and editor body sizes, offering a unified approach to scale
-/// calculations based on the current transformation configurations.
 class TransformHelper {
-  /// Creates an instance of [TransformHelper].
-  ///
-  /// The constructor initializes the sizes of the main body, main image, and
-  /// editor body, as well as optional transformation configurations.
-  ///
-  /// Example:
-  /// ```
-  /// TransformHelper(
-  ///   mainBodySize: Size(300, 400),
-  ///   mainImageSize: Size(600, 800),
-  ///   editorBodySize: Size(300, 400),
-  ///   transformConfigs: myTransformConfigs,
-  /// )
-  /// ```
+  final Size mainBodySize;
+  final Size mainImageSize;
+  final Size editorBodySize;
+
+  /// Determines whether the editor aligns content to the top-left or center.
+  final bool alignTopLeft;
+
   const TransformHelper({
     required this.mainBodySize,
     required this.mainImageSize,
     required this.editorBodySize,
-    this.transformConfigs,
+    this.alignTopLeft = true,
   });
 
-  /// The size of the main body.
-  ///
-  /// This [Size] object represents the dimensions of the main body area in the
-  /// editor, providing a reference for scaling transformations.
-  final Size mainBodySize;
-
-  /// The size of the main image.
-  ///
-  /// This [Size] object represents the dimensions of the main image being
-  /// edited, affecting how transformations are applied relative to the image.
-  final Size mainImageSize;
-
-  /// The size of the editor body.
-  ///
-  /// This [Size] object represents the dimensions of the editor's visible
-  /// area, influencing how the image is scaled and displayed.
-  final Size editorBodySize;
-
-  /// Optional transformation configurations.
-  ///
-  /// This [TransformConfigs] object contains optional settings for
-  /// transformations, such as rotation and cropping, allowing for dynamic
-  /// adjustments.
-  final TransformConfigs? transformConfigs;
-
-  /// Calculates the scale factor for transformations.
-  ///
-  /// This getter computes the appropriate scale factor based on the current
-  /// body and image sizes, taking into account rotation and cropping
-  /// configurations.
-  ///
-  /// Returns:
-  /// - A double representing the scale factor used to transform the image
-  ///   within the editor body.
   double get scale {
     if (mainBodySize.isEmpty) return 1;
-
-    Size imageSize = transformConfigs?.is90DegRotated == true
-        ? mainImageSize.flipped
-        : mainImageSize;
-    double? cropRectRatio =
-        transformConfigs != null && transformConfigs!.isNotEmpty
-            ? transformConfigs?.cropRect.size.aspectRatio
-            : null;
-    if (transformConfigs?.is90DegRotated == true) {
-      cropRectRatio = 1 / cropRectRatio!;
-    }
 
     double scaleW = editorBodySize.width / mainBodySize.width;
     double scaleH = editorBodySize.height / mainBodySize.height;
 
-    double scaleOldDifferenceW = mainBodySize.width / imageSize.width;
-    double scaleOldDifferenceH = mainBodySize.height / imageSize.height;
+    double scaleOldDifferenceW = mainBodySize.width / mainImageSize.width;
+    double scaleOldDifferenceH = mainBodySize.height / mainImageSize.height;
 
     bool stickOnHeightOld =
-        mainBodySize.aspectRatio > (cropRectRatio ?? imageSize.aspectRatio);
+        mainBodySize.aspectRatio > mainImageSize.aspectRatio;
     bool stickOnHeightNew =
-        editorBodySize.aspectRatio > (cropRectRatio ?? imageSize.aspectRatio);
+        editorBodySize.aspectRatio > mainImageSize.aspectRatio;
 
     double scaleStickSize = stickOnHeightNew != stickOnHeightOld
         ? (stickOnHeightOld ? scaleOldDifferenceW : scaleOldDifferenceH)
         : 1;
-
     double scaleImgSize = stickOnHeightNew ? scaleH : scaleW;
+
     return scaleImgSize * scaleStickSize;
+  }
+
+  Offset get offset {
+    if (mainBodySize.isEmpty) return Offset.zero;
+
+    if (!alignTopLeft) {
+      return Offset(
+        (editorBodySize.width * scale - editorBodySize.width) / 2,
+        (editorBodySize.height * scale - editorBodySize.height) / 2,
+      );
+    }
+
+    /// Image width == Screen width
+    if (mainBodySize.width == mainImageSize.width) {
+      /// Image size still same
+      if (mainImageSize.aspectRatio > editorBodySize.aspectRatio) {
+        double editorSpaceHeight =
+            (editorBodySize.height - mainImageSize.height) / 2;
+        return Offset(
+          0,
+          editorSpaceHeight,
+        );
+      }
+
+      /// Image size changed
+      else {
+        double mainSpace = (mainBodySize.height - mainImageSize.height) / 2;
+        return Offset(
+          0,
+          ((editorBodySize.height - mainBodySize.height) / 2 + mainSpace) *
+              scale,
+        );
+      }
+    }
+
+    /// Image height == Screen height
+    else if (mainBodySize.height == mainImageSize.height) {
+      double imageWidth = editorBodySize.height * mainImageSize.aspectRatio;
+      double mainScreenSpaceWidth =
+          (mainBodySize.width - mainImageSize.width) / 2;
+
+      double editorScreenSpaceWidth =
+          mainScreenSpaceWidth - (editorBodySize.width - imageWidth) / 2;
+
+      return Offset(
+        ((mainBodySize.width - imageWidth) / 2 + editorScreenSpaceWidth) *
+            scale,
+        (editorBodySize.height - mainBodySize.height) / 2 * scale,
+      );
+    }
+
+    return Offset.zero;
   }
 }

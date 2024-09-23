@@ -1,15 +1,16 @@
-// Dart imports:
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-// Flutter imports:
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:pro_image_editor/models/import_export/utils/export_import_enum.dart';
+import 'package:screenshot/screenshot.dart';
 
-// Project imports:
-import 'package:pro_image_editor/pro_image_editor.dart';
-import '../../utils/content_recorder.dart/content_recorder_controller.dart';
+import '../editor_image.dart';
+import '../history/state_history.dart';
+import '../layer.dart';
+import 'export_state_history_configs.dart';
 import 'utils/export_import_version.dart';
 
 /// Class responsible for exporting the state history of the editor.
@@ -17,78 +18,35 @@ import 'utils/export_import_version.dart';
 /// This class allows you to export the state history of the editor,
 /// including layers, filters, stickers, and other configurations.
 class ExportStateHistory {
-  /// Constructs an [ExportStateHistory] object with the given parameters.
-  ///
-  /// The [stateHistory], [_imgStateHistory], [imgSize], and [editorPosition]
-  /// parameters are required, while the [configs] parameter is optional and
-  /// defaults to [ExportEditorConfigs()].
-  ExportStateHistory({
-    required this.editorConfigs,
-    required this.stateHistory,
-    required this.imageInfos,
-    required this.imgSize,
-    required this.editorPosition,
-    required this.contentRecorderCtrl,
-    required this.context,
-    ExportEditorConfigs configs = const ExportEditorConfigs(),
-  }) : _configs = configs;
-
-  /// The current position of the editor in the state history.
-  ///
-  /// This integer value represents the index of the editor's current state
-  /// within the history, allowing for tracking and management of undo/redo
-  /// actions.
-  final int editorPosition;
-
-  /// The size of the image in the editor.
-  ///
-  /// This [Size] object specifies the dimensions of the image being edited,
-  /// providing a reference for transformations and layout adjustments.
-  final Size imgSize;
-
-  /// The list of editor state history entries.
-  ///
-  /// This list contains [EditorStateHistory] objects representing each
-  /// state of the editor, enabling navigation through different editing stages.
+  final int _editorPosition;
+  final Size _imgSize;
+  final List<EditorImage> _imgStateHistory;
   final List<EditorStateHistory> stateHistory;
-
-  /// The controller for recording content changes.
-  ///
-  /// This [ContentRecorderController] is used to manage the recording and
-  /// playback of content changes within the editor, allowing for precise
-  /// capture of editing actions.
-  late ContentRecorderController contentRecorderCtrl;
-
-  /// The configuration settings for the image editor.
-  ///
-  /// This [ProImageEditorConfigs] object contains various configuration
-  /// settings for the editor, influencing its behavior and appearance.
-  final ProImageEditorConfigs editorConfigs;
-
-  /// The configuration settings for exporting the editor state.
-  ///
-  /// This [ExportEditorConfigs] object contains settings specific to the
-  /// export process, influencing how the state history is exported.
+  late ScreenshotController _screenshotController;
   final ExportEditorConfigs _configs;
 
-  /// Information about the image being edited.
+  /// Constructs an [ExportStateHistory] object with the given parameters.
   ///
-  /// This [ImageInfos] object provides detailed information about the image,
-  /// including metadata and transformation data.
-  final ImageInfos imageInfos;
-
-  /// The build context of the editor.
-  ///
-  /// This [BuildContext] is used for widget building and accessing theme
-  /// data within the editor, providing a connection to the widget tree.
-  final BuildContext context;
+  /// The [stateHistory], [_imgStateHistory], [_imgSize], and [_editorPosition]
+  /// parameters are required, while the [configs] parameter is optional and
+  /// defaults to [ExportEditorConfigs()].
+  ExportStateHistory(
+    this.stateHistory,
+    this._imgStateHistory,
+    this._imgSize,
+    this._editorPosition, {
+    ExportEditorConfigs configs = const ExportEditorConfigs(),
+  }) : _configs = configs;
 
   /// Converts the state history to a Map.
   ///
   /// Returns a Map representing the state history of the editor,
   /// including layers, filters, stickers, and other configurations.
-  Future<Map<String, dynamic>> toMap() async {
-    List<Map<String, dynamic>> history = [];
+  Future<Map> toMap() async {
+    _screenshotController = ScreenshotController();
+
+    List history = [];
+    List cropRotateImages = [];
     List<Uint8List> stickers = [];
     List<EditorStateHistory> changes = List.from(stateHistory);
 
@@ -97,53 +55,68 @@ class ExportStateHistory {
     /// Choose history span
     switch (_configs.historySpan) {
       case ExportHistorySpan.current:
-        if (editorPosition > 0) {
-          changes = [changes[editorPosition - 1]];
-        }
+        changes = [changes[_editorPosition - 1]];
         break;
       case ExportHistorySpan.currentAndBackward:
-        changes.removeRange(editorPosition, changes.length);
+        changes.removeRange(_editorPosition, changes.length);
         break;
       case ExportHistorySpan.currentAndForward:
-        changes.removeRange(0, editorPosition - 1);
+        changes.removeRange(0, _editorPosition - 1);
         break;
       case ExportHistorySpan.all:
         break;
     }
 
     /// Build Layers and filters
-    for (EditorStateHistory element in changes) {
-      List<Map<String, dynamic>> layers = [];
+    for (var element in changes) {
+      List layers = [];
+      List filters = [];
+      Map<int, int> cropImagePostionHelper = {};
 
       await _convertLayers(
         element: element,
         layers: layers,
         stickers: stickers,
-        imageInfos: imageInfos,
       );
 
-      Map<String, dynamic> transformConfigsMap =
-          element.transformConfigs.toMap();
-      history.add({
+      if (_configs.exportFilter) {
+        for (var filter in element.filters) {
+          filters.add(filter.toMap());
+        }
+      }
+
+      /// Add Crop-Rotate images
+      /// TODO: Replace only with state after replace the crop-rotate-editor with
+      /// own solution
+      if (_configs.exportCropRotate &&
+          !cropImagePostionHelper.containsKey(element.bytesRefIndex)) {
+        cropImagePostionHelper[element.bytesRefIndex] = cropRotateImages.length;
+        cropRotateImages
+            .add(await _imgStateHistory[element.bytesRefIndex].safeByteArray);
+      }
+
+      var layerMap = {
+        if (_configs.exportCropRotate)
+          'listPosition': cropImagePostionHelper[element.bytesRefIndex] ?? 0,
         if (layers.isNotEmpty) 'layers': layers,
-        if (_configs.exportFilter && element.filters.isNotEmpty)
-          'filters': element.filters,
-        'blur': element.blur,
-        if (transformConfigsMap.isNotEmpty) 'transform': transformConfigsMap,
-      });
+        if (filters.isNotEmpty) 'filters': filters,
+      };
+
+      if (layerMap.isNotEmpty) history.add(layerMap);
     }
 
     return {
-      'version': ExportImportVersion.version_2_0_0,
+      'version': ExportImportVersion.version_1_0_0,
       'position': _configs.historySpan == ExportHistorySpan.current ||
               _configs.historySpan == ExportHistorySpan.currentAndForward
           ? 0
-          : editorPosition - 1,
+          : _editorPosition - 1,
       if (history.isNotEmpty) 'history': history,
       if (stickers.isNotEmpty) 'stickers': stickers,
+      if (cropRotateImages.isNotEmpty) 'cropRotateImages': cropRotateImages,
       'imgSize': {
-        'width': imageInfos.rawSize.width,
-        'height': imageInfos.rawSize.height,
+        'width': _imgSize.width,
+        'height': _imgSize.height,
       },
     };
   }
@@ -160,8 +133,7 @@ class ExportStateHistory {
   /// Returns a File representing the JSON file containing the state history
   /// of the editor. The optional [path] parameter specifies the path where
   /// the file should be saved. If not provided, the file will be saved in
-  /// the system's temporary directory with the default name
-  /// 'editor_state_history.json'.
+  /// the system's temporary directory with the default name 'editor_state_history.json'.
   Future<File> toFile({String? path}) async {
     // Get the system's temporary directory
     String tempDir = Directory.systemTemp.path;
@@ -183,9 +155,8 @@ class ExportStateHistory {
 
   Future<void> _convertLayers({
     required EditorStateHistory element,
-    required List<Map<String, dynamic>> layers,
-    required List<Uint8List?> stickers,
-    required ImageInfos imageInfos,
+    required List layers,
+    required List stickers,
   }) async {
     for (var layer in element.layers) {
       if ((_configs.exportPainting && layer.runtimeType == PaintingLayerData) ||
@@ -195,25 +166,8 @@ class ExportStateHistory {
       } else if (_configs.exportSticker &&
           layer.runtimeType == StickerLayerData) {
         layers.add((layer as StickerLayerData).toStickerMap(stickers.length));
-
-        double imageWidth =
-            (editorConfigs.stickerEditorConfigs?.initWidth ?? 100) *
-                layer.scale;
-        Size targetSize = Size(
-            imageWidth,
-            MediaQuery.of(context).size.height /
-                MediaQuery.of(context).size.width *
-                imageWidth);
-
-        Uint8List? result = await contentRecorderCtrl.captureFromWidget(
-          layer.sticker,
-          format: OutputFormat.png,
-          imageInfos: imageInfos,
-          targetSize: targetSize,
-        );
-        if (result == null) return;
-
-        stickers.add(result);
+        stickers
+            .add(await _screenshotController.captureFromWidget(layer.sticker));
       }
     }
   }

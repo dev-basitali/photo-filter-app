@@ -1,11 +1,17 @@
-// Project imports:
+import 'package:flutter/material.dart';
+
 import 'editor_init_configs.dart';
 
 /// Configuration class for initializing the paint editor.
 ///
-/// This class extends [EditorInitConfigs] and adds specific parameters related
-/// to painting functionality.
+/// This class extends [EditorInitConfigs] and adds specific parameters related to painting functionality.
 class PaintEditorInitConfigs extends EditorInitConfigs {
+  /// The size of the image.
+  final Size imageSize;
+
+  /// Additional padding for the editor.
+  final EdgeInsets? paddingHelper;
+
   /// Creates a new instance of [PaintEditorInitConfigs].
   ///
   /// The [theme] parameter specifies the theme data for the editor.
@@ -14,21 +20,15 @@ class PaintEditorInitConfigs extends EditorInitConfigs {
   /// The other parameters are inherited from [EditorInitConfigs].
   const PaintEditorInitConfigs({
     super.configs,
-    super.callbacks,
+    super.onUpdateUI,
     super.transformConfigs,
     super.layers,
-    super.mainImageSize,
-    super.mainBodySize,
+    super.imageSizeWithLayers,
+    super.bodySizeWithLayers,
     super.appliedFilters,
     super.appliedBlurFactor,
-    super.onCloseEditor,
-    super.onImageEditingComplete,
-    super.onImageEditingStarted,
-    super.convertToUint8List,
-    this.enableFakeHero = false,
     required super.theme,
+    required this.imageSize,
+    this.paddingHelper,
   });
-
-  /// Determines whether we draw a "fake" hero widget or not.
-  final bool enableFakeHero;
 }

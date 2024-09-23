@@ -1,12 +1,9 @@
-// Flutter imports:
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-
-// Package imports:
+import 'package:pro_image_editor/models/layer.dart';
+import 'package:pro_image_editor/modules/paint_editor/utils/draw/draw_canvas.dart';
 import 'package:pro_image_editor/pro_image_editor.dart';
 
-// Project imports:
-import '../utils/example_constants.dart';
 import '../utils/example_helper.dart';
 
 class ReorderLayerExample extends StatefulWidget {
@@ -22,9 +19,6 @@ class _ReorderLayerExampleState extends State<ReorderLayerExample>
   Widget build(BuildContext context) {
     return ListTile(
       onTap: () async {
-        await precacheImage(
-            AssetImage(ExampleConstants.of(context)!.demoAssetPath), context);
-        if (!context.mounted) return;
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -39,67 +33,49 @@ class _ReorderLayerExampleState extends State<ReorderLayerExample>
   }
 
   Widget _buildEditor() {
-    return ProImageEditor.asset(
-      ExampleConstants.of(context)!.demoAssetPath,
-      key: editorKey,
-      callbacks: ProImageEditorCallbacks(
-        onImageEditingStarted: onImageEditingStarted,
-        onImageEditingComplete: onImageEditingComplete,
-        onCloseEditor: onCloseEditor,
-      ),
-      configs: ProImageEditorConfigs(
-        designMode: platformDesignMode,
-        customWidgets: ImageEditorCustomWidgets(
-          mainEditor: CustomWidgetsMainEditor(
-            bodyItems: (editor, rebuildStream) {
-              return [
-                ReactiveCustomWidget(
-                  stream: rebuildStream,
-                  builder: (_) =>
-                      editor.selectedLayerIndex >= 0 || editor.isSubEditorOpen
-                          ? const SizedBox.shrink()
-                          : Positioned(
-                              bottom: 20,
-                              left: 0,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.lightBlue.shade200,
-                                  borderRadius: const BorderRadius.only(
-                                    topRight: Radius.circular(100),
-                                    bottomRight: Radius.circular(100),
-                                  ),
-                                ),
-                                child: IconButton(
-                                  onPressed: () {
-                                    showModalBottomSheet(
-                                      context: context,
-                                      builder: (context) {
-                                        return ReorderLayerSheet(
-                                          layers: editor.activeLayers,
-                                          onReorder: (oldIndex, newIndex) {
-                                            editor.moveLayerListPosition(
-                                              oldIndex: oldIndex,
-                                              newIndex: newIndex,
-                                            );
-                                            Navigator.pop(context);
-                                          },
-                                        );
-                                      },
-                                    );
-                                  },
-                                  icon: const Icon(
-                                    Icons.reorder,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ),
-                ),
-              ];
-            },
+    return Stack(
+      children: [
+        ProImageEditor.asset(
+          'assets/demo.png',
+          key: editorKey,
+          onImageEditingComplete: onImageEditingComplete,
+          onCloseEditor: onCloseEditor,
+        ),
+        Positioned(
+          bottom: 2 * kBottomNavigationBarHeight,
+          left: 0,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.lightBlue.shade200,
+              borderRadius: const BorderRadius.only(
+                topRight: Radius.circular(100),
+                bottomRight: Radius.circular(100),
+              ),
+            ),
+            child: IconButton(
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  showDragHandle: true,
+                  builder: (context) {
+                    return ReorderLayerSheet(
+                      layers: editorKey.currentState!.activeLayers,
+                      onReorder: (oldIndex, newIndex) {
+                        editorKey.currentState!.moveLayerListPosition(
+                          oldIndex: oldIndex,
+                          newIndex: newIndex,
+                        );
+                        /* Navigator.pop(context); */
+                      },
+                    );
+                  },
+                );
+              },
+              icon: const Icon(Icons.sort),
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 }
@@ -156,11 +132,12 @@ class _ReorderLayerSheetState extends State<ReorderLayerSheet> {
                               willChange: true,
                               isComplex:
                                   layer.item.mode == PaintModeE.freeStyle,
-                              painter: DrawPainting(
+                              painter: DrawCanvas(
                                 item: layer.item,
                                 scale: layer.scale,
                                 enabledHitDetection: false,
-                                freeStyleHighPerformance: false,
+                                freeStyleHighPerformanceScaling: false,
+                                freeStyleHighPerformanceMoving: false,
                               ),
                             ),
                           ),
@@ -176,6 +153,7 @@ class _ReorderLayerSheetState extends State<ReorderLayerSheet> {
                           : Text(
                               layer.id.toString(),
                             ),
+          trailing: const Icon(Icons.drag_handle_rounded),
         );
       },
       itemCount: widget.layers.length,

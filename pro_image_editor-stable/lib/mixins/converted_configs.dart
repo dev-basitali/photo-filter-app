@@ -1,21 +1,24 @@
-// Project imports:
-import 'package:pro_image_editor/models/editor_configs/main_editor_configs.dart';
 import 'package:pro_image_editor/pro_image_editor.dart';
 
-/// A mixin providing access to converted configurations from
-/// [ProImageEditorConfigs].
+import '../models/editor_configs/copyurl_editor_configs.dart';
+import '../models/editor_configs/upload_editor_configs.dart';
+
+/// A mixin providing access to converted configurations from [ProImageEditorConfigs].
 mixin ImageEditorConvertedConfigs {
   /// Returns the main configuration options for the editor.
   ProImageEditorConfigs get configs;
-
-  /// Returns the configuration options for the main editor.
-  MainEditorConfigs get mainEditorConfigs => configs.mainEditorConfigs;
 
   /// Returns the configuration options for the paint editor.
   PaintEditorConfigs get paintEditorConfigs => configs.paintEditorConfigs;
 
   /// Returns the configuration options for the text editor.
   TextEditorConfigs get textEditorConfigs => configs.textEditorConfigs;
+
+  /// Returns the configuration options for the upload editor.
+  UploadEditorConfigs get uploadEditorConfigs => configs.uploadEditorConfigs;
+
+  /// Returns the configuration options for the copy editor.
+  CopyUrlEditorConfigs get copyUrlEditorConfigs => configs.copyUrlEditorConfigs;
 
   /// Returns the configuration options for the crop and rotate editor.
   CropRotateEditorConfigs get cropRotateEditorConfigs =>
@@ -49,23 +52,15 @@ mixin ImageEditorConvertedConfigs {
   /// Returns the internationalization settings for the image editor.
   I18n get i18n => configs.i18n;
 
+  /// Returns the initial state history for the image editor.
+  ImportStateHistory? get initStateHistory => configs.initStateHistory;
+
   /// Returns helper lines configurations for the image editor.
   HelperLines get helperLines => configs.helperLines;
 
   /// Returns layerInteraction configurations for the image editor.
   LayerInteraction get layerInteraction => configs.layerInteraction;
 
-  /// Gets the configurations related to state history management.
-  StateHistoryConfigs get stateHistoryConfigs => configs.stateHistoryConfigs;
-
-  /// Gets the configurations related to image generation.
-  ImageGenerationConfigs get imageGenerationConfigs =>
-      configs.imageGenerationConfigs;
-
   /// Returns the hero tag used in the image editor.
   String get heroTag => configs.heroTag;
-
-  /// Indicates if the design mode is material. Otherwise the design mode is
-  /// cupertino.
-  bool get isMaterial => configs.designMode == ImageEditorDesignModeE.material;
 }

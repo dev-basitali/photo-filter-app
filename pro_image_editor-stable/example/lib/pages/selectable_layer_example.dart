@@ -1,11 +1,6 @@
-// Flutter imports:
 import 'package:flutter/material.dart';
-
-// Package imports:
 import 'package:pro_image_editor/pro_image_editor.dart';
 
-// Project imports:
-import '../utils/example_constants.dart';
 import '../utils/example_helper.dart';
 
 class SelectableLayerExample extends StatefulWidget {
@@ -21,9 +16,6 @@ class _SelectableLayerExampleState extends State<SelectableLayerExample>
   Widget build(BuildContext context) {
     return ListTile(
       onTap: () async {
-        await precacheImage(
-            AssetImage(ExampleConstants.of(context)!.demoAssetPath), context);
-        if (!context.mounted) return;
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -33,29 +25,18 @@ class _SelectableLayerExampleState extends State<SelectableLayerExample>
       },
       leading: const Icon(Icons.select_all_outlined),
       title: const Text('Selectable layer'),
-      subtitle: const Text(
-          'When you click on a layer, it will show interaction buttons.'),
       trailing: const Icon(Icons.chevron_right),
     );
   }
 
   Widget _buildEditor() {
     return ProImageEditor.asset(
-      ExampleConstants.of(context)!.demoAssetPath,
+      'assets/demo.png',
       key: editorKey,
-      callbacks: ProImageEditorCallbacks(
-        onImageEditingStarted: onImageEditingStarted,
-        onImageEditingComplete: onImageEditingComplete,
-        onCloseEditor: onCloseEditor,
-      ),
-      configs: ProImageEditorConfigs(
-        designMode: platformDesignMode,
-        imageGenerationConfigs: const ImageGenerationConfigs(
-          processorConfigs: ProcessorConfigs(
-            processorMode: ProcessorMode.auto,
-          ),
-        ),
-        layerInteraction: const LayerInteraction(
+      onImageEditingComplete: onImageEditingComplete,
+      onCloseEditor: onCloseEditor,
+      configs: const ProImageEditorConfigs(
+        layerInteraction: LayerInteraction(
           /// Choose between `auto`, `enabled` and `disabled`.
           ///
           /// Mode `auto`:
@@ -64,7 +45,7 @@ class _SelectableLayerExampleState extends State<SelectableLayerExample>
           selectable: LayerInteractionSelectable.enabled,
           initialSelected: true,
         ),
-        imageEditorTheme: const ImageEditorTheme(
+        imageEditorTheme: ImageEditorTheme(
           layerInteraction: ThemeLayerInteraction(
             buttonRadius: 10,
             strokeWidth: 1.2,
@@ -79,14 +60,14 @@ class _SelectableLayerExampleState extends State<SelectableLayerExample>
             showTooltips: false,
           ),
         ),
-        icons: const ImageEditorIcons(
+        icons: ImageEditorIcons(
           layerInteraction: IconsLayerInteraction(
             remove: Icons.clear,
             edit: Icons.edit_outlined,
             rotateScale: Icons.sync,
           ),
         ),
-        i18n: const I18n(
+        i18n: I18n(
           layerInteraction: I18nLayerInteraction(
             remove: 'Remove',
             edit: 'Edit',
